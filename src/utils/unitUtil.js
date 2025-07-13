@@ -24,6 +24,12 @@ export const units = [
     "description": "Standard metric unit for distance, equal to one thousand meters. Used for vehicle range, test track distances, or warranty distance limits."
   },
   {
+    "id": "UOM_COIL",
+    "value": "Coil",
+    "short_name": "coil",
+    "description": "Coil"
+  },
+  {
     "id": "UOM_G",
     "value": "Gram",
     "short_name": "g",
