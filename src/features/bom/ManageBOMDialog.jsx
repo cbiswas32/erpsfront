@@ -114,9 +114,9 @@ const handleExportToExcel = () => {
         ...item,
       }));
       setBOMList(processed);
-      showLoader()
+      hideLoader()
     } catch {
-      showLoader()
+      hideLoader()
       setBOMList([]);
       showSnackbar('Failed to fetch BOM List', 'error')
     }
