@@ -7,6 +7,7 @@ const erpTheme = createTheme({
       main: teal[600],
       accordian: teal[400],
       light: teal[100],
+      tab: teal[300],
       dark: teal[800],
       contrastText: '#fff',
     },

@@ -19,6 +19,7 @@ import UserLocationMapping from './pages/UserLocationMapping';
 import ProductCategory from './pages/ProductCategory';
 import ProductFeature from './pages/ProductFeature';
 import ProductPage from './pages/ProductPage';
+import VendorManagementPage from './pages/VendorManagementPage';
 
 // MUI date adapter
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -69,6 +70,8 @@ function App() {
                 <Route path="product/productCategory" element={<ProductCategory />} />
                 <Route path="product/productFeature" element={<ProductFeature />} />
                 <Route path="product/productPage" element={<ProductPage />} />
+
+                    <Route path="inventoryManagemnt/vendor" element={<VendorManagementPage />} />
 
 
                 <Route path="sa/user" element={<User />} />

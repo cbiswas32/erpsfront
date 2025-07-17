@@ -29,7 +29,7 @@ export const MenuIconMap =   [
       "icon": <ElectricMopedIcon sx={{ fontSize: 20 }} />
     },
     {
-      "menuName": "Reports",
+      "menuName": "Inventory Management",
       "id": 4,
       "icon": <ReportIcon sx={{ fontSize: 20 }}/>
     },
@@ -130,10 +130,10 @@ export  const subMenuRouteConfig = [
     },
    
     {
-      "menuName": "Reports",
-      "submenuName": "Audit Summary",
+      "menuName": "Inventory Management",
+      "submenuName": "Vendor",
       "id": 41,
-      "route": "/reports/audit-summary"
+      "route": "/inventoryManagemnt/vendor"
     },
     {
       "menuName": "Reports",
