@@ -6,9 +6,11 @@ import {
 } from '@mui/material';
 import PageWrapper from '../layouts/PageWrapper';
 import { useUI } from '../context/UIContext';
+import { getAcceessMatrix } from '../utils/loginUtil';
+
 import { Add, Edit, Delete, Visibility, Search } from '@mui/icons-material';
 import { getAllVendorsService, saveOrUpdateVendorService } from '../services/vendorService';
-import { getAcceessMatrix } from '../utils/loginUtil';
+
 import {getDistrictListService} from '../services/districtServices';
 import {getStateListService} from '../services/stateServices'
 
@@ -226,7 +228,7 @@ const fetchVendors = (hideSnackbar) => {
       buttonText: 'Add Vendor',
       buttonCallback: () => {handleOpenDialog()},
       buttonIcon: <Add fontSize='small' />,
-      access: true //accessMatrix?.create ?? false,
+      access: accessMatrix?.create ?? false,
     }
   ];
 
@@ -536,7 +538,7 @@ const fetchVendors = (hideSnackbar) => {
                  </Box>
                 </Stack>
               ))}
-              {!isViewMode && <Button onClick={() => handleAddSectionItem('addresses', { addressType: '', addressLine1: '', addressLine2: '', city: '', district: '', state: '', stateName: '', pincode: '', country: '', isPrimary: false })}>
+              {!isViewMode && <Button onClick={() => handleAddSectionItem('addresses', { addressType: '', addressLine1: '', addressLine2: '', city: '', district: '', state: '', stateName: '', pincode: '', country: '', isPrimary: true })}>
                 + Add Address
               </Button>}
             </Stack>
@@ -592,7 +594,7 @@ const fetchVendors = (hideSnackbar) => {
                  </Box>
                 </Stack>
               ))}
-              {!isViewMode && <Button onClick={() => handleAddSectionItem('bankDetails', { accountHolderName: '', accountNumber: '', ifscCode: '', bankName: '', branchName: '', isPrimary: false })}>
+              {!isViewMode && <Button onClick={() => handleAddSectionItem('bankDetails', { accountHolderName: '', accountNumber: '', ifscCode: '', bankName: '', branchName: '', isPrimary: true })}>
                + Add Bank Detail
               </Button>}
             </Stack>

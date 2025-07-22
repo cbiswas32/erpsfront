@@ -149,6 +149,7 @@ const handleExportToExcel = () => {
     showLoader()
     const bomDTO = {
       productId: product.productId,
+      bomName: `BOM-${product.productId}`,
       componentList: bomList.map((c) => ({
         componentProductId: Number(c.componentProductId),
         quantity: Number(c.quantity),
