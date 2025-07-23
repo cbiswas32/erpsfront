@@ -61,8 +61,9 @@ const statusTabs = [
   'SENT TO SUPPLIER',
   'GOOD RECEIVED PART',
   'GOOD RECEIVED FULL',
-  'PARTIAL PAYMENT',
-  'FULL PAYMENT',
+  'INVOICED',
+  // 'PARTIAL PAYMENT',
+  // 'FULL PAYMENT',
   'CLOSED',
 ];
 
