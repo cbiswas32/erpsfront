@@ -125,3 +125,67 @@ export async function getPOItemsByPOIdService(poId) {
   });
 }
 
+
+// 5. Update PO Status
+export async function updatePOStatusService(poId, newStatus, remarks = '') {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const token = getJWTToken();
+      const user = getUserDetailsObj();
+
+      const requestBody = {
+        token,
+        dataAccessDTO: {
+          userId: user?.userId,
+          userName: user?.loginId
+        },
+        poId: poId,
+        status: newStatus,
+        updatedBy: user?.userId,
+    
+      };
+
+      const response = await axiosPost('/po/updatePOStatus', requestBody);
+
+      if (response?.status && response?.data?.status) {
+        resolve(response.data.responseObject);
+      } else {
+        reject(response?.data?.message || "Failed to update PO status");
+      }
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+
+// List All POs by vendor
+export async function listAllPOsByVendorService(vendorId ) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const token = getJWTToken();
+      const user = getUserDetailsObj();
+
+      const requestBody = {
+        token,
+        dataAccessDTO: {
+          userId: user?.userId,
+          userName: user?.loginId
+        },
+        vendorId
+      };
+
+      const response = await axiosPost('/po/getPOsByVendor', requestBody);
+
+      if (response?.status && response?.data?.status) {
+        resolve(response.data.responseObject);
+      } else {
+        reject(response?.data);
+      }
+
+    } catch (error) {
+      reject(error);
+    }
+  });
+}

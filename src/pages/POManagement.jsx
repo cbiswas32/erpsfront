@@ -14,6 +14,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
+import ReplyAllIcon from '@mui/icons-material/ReplyAll';
+import Tabs from '@mui/material/Tabs';
+import Tab from '@mui/material/Tab';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Card from '@mui/material/Card';
@@ -22,10 +25,11 @@ import CardActions from '@mui/material/CardActions';
 import Alert from '@mui/material/Alert';
 import AddIcon from '@mui/icons-material/Add';
 import Edit from '@mui/icons-material/Edit';
+import BookmarkAddedIcon from '@mui/icons-material/BookmarkAdded';
 import DeleteIcon from '@mui/icons-material/Delete';
 import Visibility from '@mui/icons-material/Visibility';
 import SearchIcon from '@mui/icons-material/Search';
-import { getPOSummaryService, listAllPOsService, saveOrUpdatePOService } from '../services/purchaseOrderService';
+import { getPOSummaryService, listAllPOsService, saveOrUpdatePOService, updatePOStatusService } from '../services/purchaseOrderService';
 import { getAllVendorsService } from '../services/vendorService';
 import Close from '@mui/icons-material/Close';
 import dayjs from 'dayjs';
@@ -39,6 +43,7 @@ import { useTheme } from '@emotion/react';
 
 
 
+
 const getStatusColor = (status) => {
   switch (status) {
     case 'DRAFT': return 'warning';
@@ -48,6 +53,19 @@ const getStatusColor = (status) => {
     default: return 'default';
   }
 };
+
+
+const statusTabs = [
+  'ALL',
+  'DRAFT',
+  'SENT TO SUPPLIER',
+  'GOOD RECEIVED PART',
+  'GOOD RECEIVED FULL',
+  'PARTIAL PAYMENT',
+  'FULL PAYMENT',
+  'CLOSED',
+];
+
 
 const PoManagement = () => {
   const theme = useTheme();
@@ -68,10 +86,15 @@ const PoManagement = () => {
   const [locationList, setLocationList] = useState([]);
   const [productList, setProductList] = useState([]);
   const [mode, setMode] = useState('create');
+  const [selectedTab, setSelectedTab] = useState('ALL');
+
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   useEffect(() => {
     getLocationListAPICall(true)
     getProductListAPICall(true)
+    //getPOSummaryService(true)
     fetchVendors(true);
     fetchPOs();
     const access = getAcceessMatrix('Inventory Management', 'Purchase Order');
@@ -192,11 +215,33 @@ const PoManagement = () => {
         hideLoader();
       });
   };
+  const updatePOStatusAPICall = (poId, newStatus, hideSnackbar) => {
+    showLoader();
+
+    updatePOStatusService( poId, newStatus)
+      .then(res => {
+        showSnackbar('PO status updated successfully!', 'success');
+
+        // Refresh the list or item if needed
+        fetchPOs(true); // Replace with your actual PO list reload function
+
+        hideLoader();
+      })
+      .catch(error => {
+        console.error('Error updating PO status!', error);
+        !hideSnackbar && showSnackbar('Failed to update PO status!', 'error');
+        hideLoader();
+      });
+  };
 
 
   const handleStatusChange = async (poId, newStatus) => {
-    await saveOrUpdatePOService({ poId, status: newStatus });
-    fetchPOs();
+    if(!poId || !newStatus){
+      showSnackbar('Something went wrong! PO Id or status invalid!')
+      return
+    }
+    updatePOStatusAPICall(poId, newStatus, true);
+
   };
 
   const handleDialogOpen = (po = null, currMode) => {
@@ -220,7 +265,7 @@ const PoManagement = () => {
       buttonText: 'Create PO',
       buttonCallback: () => { handleDialogOpen() },
       buttonIcon: <AddIcon fontSize='small' />,
-      access: true //accessMatrix?.create ?? false,
+      access: accessMatrix?.create ?? false,
     }
   ];
 
@@ -229,7 +274,7 @@ const PoManagement = () => {
       <Box>
         {/* <Typography variant="h5" gutterBottom>Purchase Order Management</Typography> */}
 
-        <Stack direction="row" spacing={2} my={2} flexWrap="wrap" alignItems="center" justifyContent={"center"}>
+        <Stack direction="row" spacing={2} gap={2} my={2} flexWrap="wrap" alignItems="center" justifyContent={"center"}>
           {/* <FormControl size="small" sx={{ minWidth: 180 }}>
                         <InputLabel>Vendor</InputLabel>
                         <Select
@@ -314,6 +359,55 @@ const PoManagement = () => {
             <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
           </Box>
         )}
+        <Box
+          sx={{
+            borderRadius: 2,
+            backgroundColor: '#fff',
+
+            p: 1,
+            mb: 1,
+          }}
+        >
+          <Tabs
+            value={selectedTab}
+            onChange={(e, newValue) => setSelectedTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            aria-label="PO Status Tabs"
+            textColor="primary"
+            indicatorColor="primary"
+            sx={{
+              '.MuiTabs-flexContainer': {
+                gap: 1,
+              },
+            }}
+          >
+            {statusTabs.map((status) => (
+              <Tab
+                key={status}
+                label={status}
+                value={status}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 500,
+                  borderRadius: 8,
+                  px: 2,
+                  py: 1,
+                  minHeight: 'unset',
+                  minWidth: 120,
+                  transition: '0.3s',
+                  color: selectedTab === status ? 'primary.main' : 'text.secondary',
+                  backgroundColor: selectedTab === status ? 'primary.light' : 'transparent',
+                  '&:hover': {
+                    backgroundColor: selectedTab === status ? 'primary.light' : 'grey.100',
+                  },
+                }}
+              />
+            ))}
+          </Tabs>
+        </Box>
+
+
 
         {/* <Grid container spacing={2}>
                     {poList.map((po) => (
@@ -340,8 +434,23 @@ const PoManagement = () => {
                         </Grid>
                     ))}
                 </Grid> */}
-        <Grid container spacing={3} >
-          {poList?.map((po, index) => (
+    {poList?.filter(po => selectedTab === 'ALL' || po.status === selectedTab)?.length > 0 && <Box sx={{display: 'flex', justifyContent: 'end', alignItems: 'center', pr: 2, mb:2}}>
+                   <TextField
+  size="small"
+  placeholder="Search PO Number"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  InputProps={{
+    startAdornment: <SearchIcon sx={{ mr: 1 }} />,
+  }}
+  sx={{ minWidth: 200 }}
+/>
+    </Box>}
+
+        <Grid container spacing={3} mb={3}>
+          {poList?.filter(po => selectedTab === 'ALL' || po.status === selectedTab)?.filter(po =>
+            po.po_number?.toLowerCase().includes(searchQuery.toLowerCase())
+          )?.map((po, index) => (
             <Grid item xs={12} sm={6} md={4} key={po.po_id}>
               <Card
                 sx={{
@@ -407,7 +516,7 @@ const PoManagement = () => {
                   </Typography>
 
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    <strong>PO Date:</strong> {dayjs(po.poDate).format('DD MMMM YYYY') || '—'}
+                    <strong>PO Date:</strong> {dayjs(po.po_date).format('DD MMMM YYYY') || '—'}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     <strong>Expected Delivery Date:</strong> {dayjs(po.expected_delivery_date).format('DD MMMM YYYY') || '—'}
@@ -415,7 +524,7 @@ const PoManagement = () => {
                 </CardContent>
 
                 <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
-                  {po.status === "DRAFT" && <Button
+                  {accessMatrix?.create && po.status === "DRAFT" && <Button
                     size="small"
                     variant="outlined"
                     color="success"
@@ -424,6 +533,26 @@ const PoManagement = () => {
                   >
                     Edit
                   </Button>}
+                  {accessMatrix?.create && po.status === "DRAFT" && <Button
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<BookmarkAddedIcon />}
+                    onClick={() => handleStatusChange(po.po_id, 'SENT TO SUPPLIER')}
+                  >
+                    Mark Sent to Supplier
+                  </Button>}
+
+                   {accessMatrix?.create && po.status === 'SENT TO SUPPLIER'  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    startIcon={<ReplyAllIcon />}
+                    onClick={() => handleStatusChange(po.po_id, "DRAFT" )}
+                  >
+                    Move back to Draft
+                  </Button>}
+
                   <Button
                     size="small"
                     variant="outlined"
@@ -437,6 +566,7 @@ const PoManagement = () => {
               </Card>
             </Grid>
           ))}
+
         </Grid>
 
         {openDialog && (
@@ -456,6 +586,7 @@ const PoManagement = () => {
                 locationList={locationList}
                 productList={productList}
                 mode={mode}
+                filters={filters}
               />
               {/* <PurchaseOrderA4View poData = {data}/> */}
             </DialogContent>

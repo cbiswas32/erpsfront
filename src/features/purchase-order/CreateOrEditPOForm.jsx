@@ -22,6 +22,7 @@ import POA4View from './POA4View';
 import Fab from '@mui/material/Fab';
 import GetAppIcon from '@mui/icons-material/GetApp';
 import { useReactToPrint } from 'react-to-print';
+import dayjs from 'dayjs';
 
 const paymentTermsOptions = [
   { label: 'Advance Payment', value: 'Advance Payment' },
@@ -78,7 +79,7 @@ const getFormattedLocationAddress = (addr) => {
 
 
 
-const CreateOrEditPOForm = ({ mode = '', editData, onClose, onSuccess, vendorList, locationList, productList }) => {
+const CreateOrEditPOForm = ({ mode = '', editData, onClose, onSuccess, vendorList, locationList, productList, filters }) => {
   const printRef = useRef(null);
   const [formData, setFormData] = useState({
     poId: '',
@@ -144,8 +145,8 @@ const CreateOrEditPOForm = ({ mode = '', editData, onClose, onSuccess, vendorLis
         poId: editData.po_id,
         poNumber: editData.po_number,
         vendorId: editData.vendor_id,
-        poDate: editData.po_date.split('T')[0],
-        expectedDeliveryDate: editData.expected_delivery_date.split('T')[0],
+        poDate: editData.po_date && dayjs(editData.po_date).format('YYYY-MM-DD'),
+        expectedDeliveryDate: editData.expected_delivery_date && dayjs(editData.expected_delivery_date).format('YYYY-MM-DD'),
         billingAddressId: editData.vendor_location_id,
         deliveryAddressId: editData.delivery_location_id,
         billingAddress: editData.billing_address,
@@ -438,13 +439,19 @@ const CreateOrEditPOForm = ({ mode = '', editData, onClose, onSuccess, vendorLis
         // Optionally, reset the form or navigate
         // resetForm();
         // navigate('/po-list');
+         hideLoader()
+        if(filters.vendorId === poForm.vendorId){
+          onSuccess();
+        }
+
         onClose();
       })
       .catch((error) => {
         console.error('Error saving PO:', error);
         showSnackbar('Failed to save Purchase Order. Please try again.', 'error');
+         hideLoader()
       }).finally(() => {
-        hideLoader()
+       
       });
     // onSuccess();
 

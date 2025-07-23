@@ -21,6 +21,7 @@ import ProductFeature from './pages/ProductFeature';
 import ProductPage from './pages/ProductPage';
 import VendorManagementPage from './pages/VendorManagementPage';
 import PoManagement from './pages/POManagement';
+import InvoiceManagement from './pages/InvoiceManagement';
 
 // MUI date adapter
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -75,8 +76,10 @@ function App() {
 
                 <Route path="inventoryManagemnt/vendor" element={<VendorManagementPage />} />
                 <Route path="inventoryManagemnt/po" element={<PoManagement />} />
+                <Route path="inventoryManagemnt/pi" element={<InvoiceManagement />} />
 
                 <Route path="sa/user" element={<User />} />
+
                 <Route path="sa/userrolemap" element={<UserRoleFunctionMap />} />
 
 
