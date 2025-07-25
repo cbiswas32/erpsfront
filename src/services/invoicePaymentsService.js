@@ -136,3 +136,35 @@ export async function getPaymentsByInvoiceIdService(invoiceId) {
     }
   });
 }
+
+/**
+ * Get all payments grouped by invoice for a given PO ID
+ */
+export async function getPaymentsGroupedByInvoiceService(poId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const token = getJWTToken();
+      const user = getUserDetailsObj();
+
+      const requestBody = {
+        token,
+        dataAccessDTO: {
+          userId: user?.userId,
+          userName: user?.loginId,
+        },
+        poId,
+      };
+
+      const response = await axiosPost("/invoice/getPaymentsGroupedByInvoice", requestBody);
+
+      if (response?.status && response?.data?.success) {
+        resolve(response.data.data || []);
+      } else {
+        reject(response?.data?.message || "Failed to fetch grouped payments");
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+

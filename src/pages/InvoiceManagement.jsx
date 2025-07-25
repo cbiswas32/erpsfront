@@ -48,7 +48,7 @@ const InvoiceManagement = () => {
 
   useEffect(() => {
     fetchVendors();
-     const access = getAcceessMatrix('Inventory Management', 'Purchase Order');
+     const access = getAcceessMatrix('Inventory Management', 'Purchase Invoices and Payments');
         setAccessMatrix(access);
 
   }, []);

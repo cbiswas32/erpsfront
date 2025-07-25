@@ -15,6 +15,7 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import ReplyAllIcon from '@mui/icons-material/ReplyAll';
+import RuleIcon from '@mui/icons-material/Rule';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Chip from '@mui/material/Chip';
@@ -40,7 +41,10 @@ import { getAcceessMatrix } from '../utils/loginUtil';
 import { getAllLocationListService } from '../services/locationService';
 import { getAllProductsService } from '../services/productService';
 import { useTheme } from '@emotion/react';
-
+import GoodsReceivedCompare from '../features/purchase-order/GoodsReceivedCompare';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import Summery from '../features/purchase-order/Summery';
 
 
 
@@ -59,6 +63,7 @@ const statusTabs = [
   'ALL',
   'DRAFT',
   'SENT TO SUPPLIER',
+  'VALIDATE GOODS',
   'GOOD RECEIVED PART',
   'GOOD RECEIVED FULL',
   'INVOICED',
@@ -88,6 +93,8 @@ const PoManagement = () => {
   const [productList, setProductList] = useState([]);
   const [mode, setMode] = useState('create');
   const [selectedTab, setSelectedTab] = useState('ALL');
+  const [compareDialog, setCompareDialog] = useState(false);
+  const [summeryDialogOpen, setSummeryDialogOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -225,7 +232,7 @@ const PoManagement = () => {
 
         // Refresh the list or item if needed
         fetchPOs(true); // Replace with your actual PO list reload function
-
+        setCompareDialog(false)
         hideLoader();
       })
       .catch(error => {
@@ -250,6 +257,24 @@ const PoManagement = () => {
     setMode(currMode)
     setOpenDialog(true);
   };
+
+   const handleCompareDialogOpen = (po = null) => {
+    setEditData(po);
+    setCompareDialog(true);
+  };
+   const handleCompareDialogClose = () => {
+    setEditData(null);
+    setCompareDialog(false);
+  };
+   const handleSummeryDialogOpen = (po = null) => {
+    setEditData(po);
+    setSummeryDialogOpen(true);
+  };
+   const handleSummeryDialogClose = () => {
+    setEditData(null);
+    setSummeryDialogOpen(false);
+  };
+
 
   const handleDialogClose = () => {
     setEditData(null);
@@ -553,6 +578,52 @@ const PoManagement = () => {
                   >
                     Move back to Draft
                   </Button>}
+                   {accessMatrix?.create && (po.status === 'VALIDATE GOODS' )  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    startIcon={<RuleIcon />} 
+                    onClick={() => {handleCompareDialogOpen(po)}}
+                  >
+                    Validate against GRN
+                  </Button>}
+                   {accessMatrix?.create && (po.status === 'GOOD RECEIVED PART' || po.status === 'GOOD RECEIVED FULL')  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="error"
+                    startIcon={<ReplyAllIcon />}
+                    onClick={() => handleStatusChange(po.po_id, 'VALIDATE GOODS' )}
+                  >
+                    Move to Validate
+                  </Button>}
+                   {accessMatrix?.create && (po.status === 'GOOD RECEIVED PART' || po.status === 'GOOD RECEIVED FULL')  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                    startIcon={<ReceiptIcon />}
+                    onClick={() => handleStatusChange(po.po_id, 'INVOICED' )}
+                  >
+                   Mark Invoiced
+                  </Button>}
+                   {accessMatrix?.create && (po.status === 'INVOICED' )  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                    startIcon={<Close />}
+                    onClick={() => handleStatusChange(po.po_id, 'CLOSED' )}
+                  >
+                   Mark Closed
+                  </Button>}
+
+                   {(po.status === 'CLOSED' )  && <Button
+                    size="small"
+                    variant="outlined"
+                    color="success"
+                    startIcon={<AccountBalanceIcon />}
+                    onClick={ () => {handleSummeryDialogOpen(po)}}
+                  >
+                   Invoice and GRN Summery
+                  </Button>}
 
                   <Button
                     size="small"
@@ -594,6 +665,9 @@ const PoManagement = () => {
           </Dialog>
         )}
       </Box>
+      <GoodsReceivedCompare updatePOStatusAPICall={updatePOStatusAPICall} open={compareDialog} poId={editData?.po_id} onClose={handleCompareDialogClose} />
+      <Summery updatePOStatusAPICall={updatePOStatusAPICall} open={summeryDialogOpen} poId={editData?.po_id} onClose={handleSummeryDialogClose} />
+    
     </PageWrapper>
   );
 

@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Autocomplete from "@mui/material/Autocomplete";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
@@ -29,63 +30,76 @@ import * as XLSX from "xlsx";
 function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
   const [bomList, setBOMList] = useState([]);
   const [grandTotal, setGrandTotal] = useState(0);
-  const { showSnackbar, showLoader, hideLoader } = useUI()
+  const { showSnackbar, showLoader, hideLoader } = useUI();
   console.log("bomList", bomList);
 
+  const handleExportToExcel = () => {
+    const productName = product?.productName || "N/A";
+    const productCode = product?.productCode || "N/A";
+    const todayDate = new Date().toLocaleDateString();
 
+    const totalItems = bomList?.length || 0;
 
-const handleExportToExcel = () => {
-  const productName = product?.productName || 'N/A';
-  const productCode = product?.productCode || 'N/A';
-  const todayDate = new Date().toLocaleDateString();
-
-  const totalItems = bomList?.length || 0;
-
-  const worksheetHeader = [
-    ["Product Name", productName],
-    ["Product Code", productCode],
-    ["Grand Total", grandTotal],
-    ["Total Items Needed", totalItems],
-    ["Date", todayDate],
-    [], // Empty row for spacing
-  ];
-
-  const worksheetColumns = [
-    ["Component Name", "Product Code", "Quantity", "Unit", "Unit Price (Rs.)", "Total Price (Rs.)"],
-  ];
-
-  const worksheetData = bomList?.map(item => {
-    const product = allProducts?.find(p => p.productId === Number(item.componentProductId)) || {};
-    return [
-      product.productName || 'N/A',
-      product.productCode || 'N/A',
-      item.quantity,
-      item.unit || '',
-      item.unitPrice || 0,
-      (parseFloat(item.unitPrice || 0) * parseFloat(item.quantity || 0)).toFixed(2)
+    const worksheetHeader = [
+      ["Product Name", productName],
+      ["Product Code", productCode],
+      ["Grand Total", grandTotal],
+      ["Total Items Needed", totalItems],
+      ["Date", todayDate],
+      [], // Empty row for spacing
     ];
-  });
 
-  const finalSheet = [...worksheetHeader, ...worksheetColumns, ...worksheetData];
+    const worksheetColumns = [
+      [
+        "Component Name",
+        "Product Code",
+        "Quantity",
+        "Unit",
+        "Unit Price (Rs.)",
+        "Total Price (Rs.)",
+      ],
+    ];
 
-  const worksheet = XLSX.utils.aoa_to_sheet(finalSheet);
+    const worksheetData = bomList?.map((item) => {
+      const product =
+        allProducts?.find(
+          (p) => p.productId === Number(item.componentProductId)
+        ) || {};
+      return [
+        product.productName || "N/A",
+        product.productCode || "N/A",
+        item.quantity,
+        item.unit || "",
+        item.unitPrice || 0,
+        (
+          parseFloat(item.unitPrice || 0) * parseFloat(item.quantity || 0)
+        ).toFixed(2),
+      ];
+    });
 
-  // Set column widths for better display
-  worksheet['!cols'] = [
-    { wch: 30 }, // Component Name
-    { wch: 20 }, // Product Code
-    { wch: 10 }, // Quantity
-    { wch: 10 }, // Unit
-    { wch: 15 }, // Unit Price
-    { wch: 15 }, // Total Price
-  ];
+    const finalSheet = [
+      ...worksheetHeader,
+      ...worksheetColumns,
+      ...worksheetData,
+    ];
 
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'BOM');
+    const worksheet = XLSX.utils.aoa_to_sheet(finalSheet);
 
-  XLSX.writeFile(workbook, `BOM_${productName.replace(/\s+/g, '_')}.xlsx`);
-};
+    // Set column widths for better display
+    worksheet["!cols"] = [
+      { wch: 30 }, // Component Name
+      { wch: 20 }, // Product Code
+      { wch: 10 }, // Quantity
+      { wch: 10 }, // Unit
+      { wch: 15 }, // Unit Price
+      { wch: 15 }, // Total Price
+    ];
 
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "BOM");
+
+    XLSX.writeFile(workbook, `BOM_${productName.replace(/\s+/g, "_")}.xlsx`);
+  };
 
   useEffect(() => {
     if (open && product?.productId) {
@@ -105,7 +119,7 @@ const handleExportToExcel = () => {
 
   const fetchBOM = async (productId) => {
     try {
-      showLoader()
+      showLoader();
       const res = await getBOMByProductIdService(productId);
       const processed = (res || []).map((item) => ({
         tempId: Date.now() + Math.random(),
@@ -114,11 +128,11 @@ const handleExportToExcel = () => {
         ...item,
       }));
       setBOMList(processed);
-      hideLoader()
+      hideLoader();
     } catch {
-      hideLoader()
+      hideLoader();
       setBOMList([]);
-      showSnackbar('Failed to fetch BOM List', 'error')
+      showSnackbar("Failed to fetch BOM List", "error");
     }
   };
 
@@ -146,7 +160,7 @@ const handleExportToExcel = () => {
   };
 
   const handleSave = async () => {
-    showLoader()
+    showLoader();
     const bomDTO = {
       productId: product.productId,
       bomName: `BOM-${product.productId}`,
@@ -160,10 +174,10 @@ const handleExportToExcel = () => {
     try {
       await saveOrUpdateBOMService(bomDTO);
       handleClose();
-      hideLoader()
+      hideLoader();
     } catch (err) {
-      hideLoader()
-      showSnackbar('Failed to save BOM', 'error')
+      hideLoader();
+      showSnackbar("Failed to save BOM", "error");
       console.error("Error saving BOM:", err);
     }
   };
@@ -219,7 +233,7 @@ const handleExportToExcel = () => {
                   return (
                     <TableRow key={row.tempId}>
                       <TableCell>
-                        <TextField
+                        {/*<TextField
                           select
                           fullWidth
                           size="small"
@@ -256,7 +270,49 @@ const handleExportToExcel = () => {
                               {p.productName} ({p.productCode})
                             </MenuItem>
                           ))}
-                        </TextField>
+                        </TextField>*/}
+                        <Autocomplete
+                          sx={{width: 270}}
+                          size="small"
+                          options={allProducts}
+                          getOptionLabel={(option) =>
+                            option?.productName && option?.productCode
+                              ? `${option.productName} (${option.productCode})`
+                              : ""
+                          }
+                          value={
+                            allProducts.find(
+                              (x) => x.productId === row.componentProductId
+                            ) || null
+                          }
+                          onChange={(event, newValue) => {
+                            handleChange(
+                              row.tempId,
+                              "componentProductId",
+                              newValue?.productId || ""
+                            );
+                            handleChange(
+                              row.tempId,
+                              "unit",
+                              newValue?.unit || ""
+                            );
+                            handleChange(
+                              row.tempId,
+                              "unitPrice",
+                              newValue?.unitPrice || ""
+                            );
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Component Product"
+                              variant="outlined"
+                            />
+                          )}
+                          isOptionEqualToValue={(option, value) =>
+                            option.productId === value.productId
+                          }
+                        />
                       </TableCell>
                       <TableCell>
                         <TextField

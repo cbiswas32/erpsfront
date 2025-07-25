@@ -9,6 +9,9 @@ import CreateEditProductDialog from '../features/product/CreateEditProductDialog
 import ViewProductDialog from '../features/product/ViewProductDialog';
 import { getAllProductFeaturesService } from '../services/productFeatureServices';
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import { getAcceessMatrix } from '../utils/loginUtil';
 import ManageBOMDialog from '../features/bom/ManageBOMDialog';
 
@@ -25,6 +28,8 @@ function ProductPage() {
   const [productFeatureList, setProductFeatureList] = useState([]);
   const [accessMatrix, setAccessMatrix] = useState({});
   const [openBOMDialog, setOpenBOMDialog] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(0);
+  
 
   useEffect(() => {
     getProductListAPICall(true);
@@ -139,9 +144,31 @@ function ProductPage() {
 
   return (
     <PageWrapper title="Product Management" actionButtons={ActionButtonsArr}>
-      <Box sx={{ m: 2 }} />
+      <Box sx={{ m: 2, display: 'flex', justifyContent: 'end' }} > 
+           <TextField
+           size={'small'}
+              select
+              sx={{minWidth: 200}}
+              label="Filter by Product Category"s
+              name="category_id"
+              value={selectedCategoryId}
+              onChange={(e) => {setSelectedCategoryId(e.target.value)}}
+              required
+            >
+               <MenuItem key={0} value={0}>
+                  {'All Category'}
+                </MenuItem>
+
+              {productCategoryList.map(cat => (
+                <MenuItem key={cat.productCategoryId} value={cat.productCategoryId}>
+                  {cat.productCategoryName}
+                </MenuItem>
+              ))}
+            </TextField>
+      </Box>
+    
       <ProductTable
-        productList={productList}
+        productList={productList?.filter(x=> selectedCategoryId == 0 || x.productCategoryId === selectedCategoryId)}
         productCategoryList={productCategoryList}
         getProductListAPICall={getProductListAPICall}
         onClickEdit={onClickEdit}

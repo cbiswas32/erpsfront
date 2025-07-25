@@ -16,11 +16,18 @@ import Stack from '@mui/material/Stack';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import Autocomplete  from "@mui/material/Autocomplete";
+import Collapse from '@mui/material/Collapse';
+
 import {useUI} from '../../context/UIContext'
+import { useEffect } from "react";
 
 const defaultItem = {
   productId: "",
+  pName: "",
+  poId: "",
+  poItemId: "",
   quantity: "",
+  receivedQuantity: "",
   unitPrice: "",
   uom: "",
   cgstPercent: 0,
@@ -34,12 +41,17 @@ const defaultItem = {
 };
 
 
-export default function PurchaseOrderItemManager({ productList = [], taxType, onItemsChange, poItems = [], setPoItems }) {
+export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsChange, poItems = [], setPoItems }) {
   //const [poItems, setPoItems] = useState([]);
   const [formItem, setFormItem] = useState(defaultItem);
   const [isEdit, setIsEdit] = useState(false);
   const [editIndex, setEditIndex] = useState(null);
+  const [taxType, setTaxType] = useState('')
   const { showSnackbar, showLoader, hideLoader } = useUI();
+
+  useEffect(() => {
+    setTaxType(taxTypeOrg)
+  }, [taxTypeOrg])
 
   const handleChange = (field, value) => {
     let updated = { ...formItem, [field]: value };
@@ -65,8 +77,8 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
     }
 
     // If quantity or price or GST changes
-    if (["quantity", "unitPrice", "cgstPercent", "sgstPercent", "igstPercent"].includes(field)) {
-      const qty = parseFloat(updated.quantity || 0);
+    if (["quantity", "receivedQuantity", "unitPrice", "cgstPercent", "sgstPercent", "igstPercent"].includes(field)) {
+      const qty = parseFloat(updated.receivedQuantity || 0);
       const price = parseFloat(updated.unitPrice || 0);
       const baseAmount = qty * price;
 
@@ -85,27 +97,31 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
   };
 
   const handleAdd = () => {
+
+    showSnackbar('Adding new items is not allowed. Only updates are permitted.', 'warning');
+    return
+
     //if (!formItem.productId || !formItem.quantity || !formItem.unitPrice) return;
-    if(!taxType){
-      showSnackbar('Please specify the tax type to add any item!', 'error')
-      return
-    }
-    if(!formItem.productId){
-      showSnackbar('Please select a product first to add!', 'error')
-      return
-    }
-     if(!formItem.quantity ){
-      showSnackbar('Please specify  product quantity to add!', 'error')
-      return
-    }
-    if(!formItem.unitPrice){
-      showSnackbar('Please specify  product unit price to add!', 'error')
-      return
-    }
-    const updated = [...poItems, { ...formItem }];
-    setPoItems(updated);
-    setFormItem(defaultItem);
-    onItemsChange && onItemsChange(updated);
+    // if(!taxType){
+    //   showSnackbar('Please specify the tax type to add any item!', 'error')
+    //   return
+    // }
+    // if(!formItem.productId){
+    //   showSnackbar('Please select a product first to add!', 'error')
+    //   return
+    // }
+    //  if(!formItem.quantity ){
+    //   showSnackbar('Please specify  product quantity to add!', 'error')
+    //   return
+    // }
+    // if(!formItem.unitPrice){
+    //   showSnackbar('Please specify  product unit price to add!', 'error')
+    //   return
+    // }
+    // const updated = [...poItems, { ...formItem }];
+    // setPoItems(updated);
+    // setFormItem(defaultItem);
+    // onItemsChange && onItemsChange(updated);
   };
 
   const handleUpdate = () => {
@@ -121,6 +137,11 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
       showSnackbar('Please specify  product quantity to add!', 'error')
       return
     }
+   if (!formItem.receivedQuantity || formItem.receivedQuantity < 0) {
+  showSnackbar('Received Quantity must be a valid positive number.', 'error');
+  return;
+}
+  
     if(!formItem.unitPrice){
       showSnackbar('Please specify  product unit price to add!', 'error')
       return
@@ -136,6 +157,7 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
 
   const handleEdit = (index) => {
     setFormItem(poItems[index]);
+    console.log("poItems[index]", poItems[index])
     setEditIndex(index);
     setIsEdit(true);
   };
@@ -148,137 +170,75 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>Purchase Order Items</Typography>
+      <Typography variant="h6" gutterBottom>Received Goods</Typography>
+        
+          {taxType && <Box mt={3}>
+              <TextField
+                  fullWidth
+                  size="small"
+                  select
+                  label="Tax Type"
+                  value={taxType || ''}
 
-      {/*
-      <Stack spacing={2} direction="row" flexWrap="wrap" mb={2}>
-        <TextField
-          select
-          label="Product"
-          size="small"
-          sx={{ minWidth: 200 }}
-          value={formItem.productId}
-          onChange={(e) => handleChange("productId", e.target.value)}
-        >
-          {productList.map((p) => (
-            <MenuItem key={p.productId} value={p.productId}>
-              {p.productName}
-            </MenuItem>
-          ))}
-        </TextField>
+                  onChange={(e) => {
+                      setTaxType(e.target.value)
+                  }}
+              >
+                  <MenuItem value="INTRA">CGST + SGST</MenuItem>
+                  <MenuItem value="INTER">IGST</MenuItem>
+              </TextField>
+              <Typography mt={1} mb={3} ml={1} color={'error'} variant="caption">**Please note that, Tax type mentioned in PO is {taxTypeOrg ? (taxTypeOrg === "INTRA" ? "CGST + SGST" : "IGST") : "-"}</Typography>
+          </Box>}
 
-        <TextField
-          label="Quantity"
-          size="small"
-          type="number"
-          value={formItem.quantity}
-          onChange={(e) => handleChange("quantity", e.target.value)}
-        />
-
-        <TextField
-          label="Unit Price"
-          size="small"
-          type="number"
-          value={formItem.unitPrice}
-          onChange={(e) => handleChange("unitPrice", e.target.value)}
-        />
-
-        <TextField
-          label="UOM"
-          size="small"
-          value={formItem.uom}
-          disabled
-        />
-
-        <TextField
-          label="CGST %"
-          size="small"
-          type="number"
-          value={formItem.cgstPercent}
-          onChange={(e) => handleChange("cgstPercent", e.target.value)}
-        />
-
-        <TextField
-          label="SGST %"
-          size="small"
-          type="number"
-          value={formItem.sgstPercent}
-          onChange={(e) => handleChange("sgstPercent", e.target.value)}
-        />
-
-        <TextField
-          label="IGST %"
-          size="small"
-          type="number"
-          value={formItem.igstPercent}
-          onChange={(e) => handleChange("igstPercent", e.target.value)}
-        />
-
-        <TextField
-          label="Total"
-          size="small"
-          value={formItem.totalAmount.toFixed(2)}
-          disabled
-        />
-
-        <Box alignSelf="center">
-          <Button variant={isEdit ? "contained" : "outlined"} onClick={isEdit ? handleUpdate : handleAdd}>
-            {isEdit ? "Update Item" : "Add Item"}
-          </Button>
-        </Box>
-      </Stack> 
-      */}
-
-      <Paper
+    
+<Collapse in={isEdit} timeout={400}>
+<Paper
   elevation={3}
   sx={{
     p: 3,
     borderRadius: 2,
     backgroundColor: "#f9f9f9",
     mb: 3,
+    mt:1
   }}
 >
   <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb:2 }}>
-    Add PO Items
+    Update GRN Items
   </Typography>
 
   <Grid container spacing={2}>
     <Grid item xs={12} sm={6} md={4}>
-      {/*<TextField
-        select
+     <TextField
         fullWidth
-        label="Product"
+        label="Product Name"
         size="small"
-        value={formItem.productId}
-        onChange={(e) => handleChange("productId", e.target.value)}
-      >
-        {productList.map((p) => (
-          <MenuItem key={p.productId} value={p.productId}>
-            {p.productName}
-          </MenuItem>
-        ))}
-      </TextField>*/}
-      <Autocomplete
-        fullWidth
-        size="small"
-        options={productList}
-        getOptionLabel={(option) => option.productName || ""}
-        value={productList.find(p => p.productId === formItem.productId) || null}
-        onChange={(e, newValue) => handleChange("productId", newValue?.productId || "")}
-        renderInput={(params) => (
-          <TextField {...params} label="Product" variant="outlined" />
-        )}
+       
+        value={formItem.pName}
+        onChange={(e) => handleChange("pName", e.target.value)}
+        disabled
       />
     </Grid>
 
     <Grid item xs={6} sm={3} md={2}>
       <TextField
         fullWidth
-        label="Quantity"
+        label="Quantity mention in PO"
         size="small"
         type="number"
         value={formItem.quantity}
         onChange={(e) => handleChange("quantity", e.target.value)}
+        disabled
+      />
+    </Grid>
+    <Grid item xs={6} sm={3} md={2}>
+      <TextField
+        fullWidth
+        label="Received Quantity"
+        size="small"
+        type="number"
+        value={formItem.receivedQuantity}
+        onChange={(e) => handleChange("receivedQuantity", e.target.value)}
+    
       />
     </Grid>
 
@@ -355,11 +315,13 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
         onClick={isEdit ? handleUpdate : handleAdd}
         sx={{ height: "100%" }}
       >
-        {isEdit ? "Update Item" : "+ Add Item"}
+        { "Update Item" }
       </Button>
     </Grid>
   </Grid>
 </Paper>
+</Collapse>
+
 
       {/* Table View */}
       <Table size="small">
@@ -367,10 +329,10 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
           <TableRow>
             <TableCell>Sl.</TableCell>
             <TableCell>Product</TableCell>
-            <TableCell>Qty</TableCell>
+            <TableCell>Qty PO</TableCell>
+            <TableCell>Received</TableCell>
             <TableCell>UOM</TableCell>
             <TableCell>Unit Price</TableCell>
-            <TableCell>Before Tax</TableCell>
             <TableCell>CGST</TableCell>
             <TableCell>SGST</TableCell>
             <TableCell>IGST</TableCell>
@@ -380,15 +342,15 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
         </TableHead>
         <TableBody>
           {poItems?.length>0 ? poItems.map((item, index) => {
-            const product = productList.find(p => p.productId == item.productId);
+           
             return (
-              <TableRow key={index}>
+              <TableRow key={index} sx={{backgroundColor: parseFloat(item.quantity || 0) > parseFloat(item.receivedQuantity || 0) ? 'error.light' : parseFloat(item.quantity || 0) < parseFloat(item.receivedQuantity || 0) && 'success.light'  }}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell>{product?.productName || item.productId}</TableCell>
+                <TableCell>{item.pName}</TableCell>
                 <TableCell>{item.quantity}</TableCell>
+                <TableCell>{item.receivedQuantity}</TableCell>
                 <TableCell>{item.uom}</TableCell>
                 <TableCell>{item.unitPrice}</TableCell>
-                <TableCell>{Number(parseFloat(item.unitPrice || 0) * parseFloat(item.quantity || 0)).toFixed(2)}</TableCell>
                 <TableCell>
                   <Box display="flex" flexDirection="column">
                     <Typography>{Number(item.cgstAmount || 0).toFixed(2)}</Typography>
@@ -418,9 +380,9 @@ export default function PurchaseOrderItemManager({ productList = [], taxType, on
                   <IconButton onClick={() => handleEdit(index)}>
                     <EditIcon />
                   </IconButton>
-                  <IconButton color="error" onClick={() => handleDelete(index)}>
+                  {/* <IconButton color="error" onClick={() => handleDelete(index)}>
                     <DeleteIcon />
-                  </IconButton>
+                  </IconButton> */}
                 </TableCell>
               </TableRow>
             );

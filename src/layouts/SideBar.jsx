@@ -57,6 +57,7 @@ export default function SideBar({ open, setOpen }) {
         }}
         onClick={(e) => {
           e.stopPropagation();
+          //console.log(menu, 'm')
           if (!menu.subMenuArr.length) {
             navigate(menu.route);
             handleCloseDrawer();
@@ -95,7 +96,7 @@ export default function SideBar({ open, setOpen }) {
                 transition: 'all 0.2s ease',
               }}
             >
-              {submenu.submenuName}
+              {submenu.submenuName} 
             </Box>
           ))}
         </Stack>

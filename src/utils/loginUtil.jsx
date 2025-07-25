@@ -3,14 +3,14 @@ import ReportGmailerrorredIcon from '@mui/icons-material/ReportGmailerrorred';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 
 export const setStoredUserDetails = (loginUserData) => {
-    localStorage.setItem("loggedInUserBKQA", loginUserData );
+    localStorage.setItem("loggedInUserERPS", loginUserData );
 };
 export const getStoredUserDetails = () => {
-    const user = localStorage.getItem("loggedInUserBKQA");
+    const user = localStorage.getItem("loggedInUserERPS");
     return user ? JSON.parse(user) : null;
 };
 export const removedStoredUserDetails = () => {
-    localStorage.removeItem("loggedInUserBKQA");
+    localStorage.removeItem("loggedInUserERPS");
 };
 export const getUserDetailsObj = () =>{
     let details = getStoredUserDetails()
@@ -57,7 +57,7 @@ export const getMenuDetails = () =>{
     
     let details = getStoredUserDetails()
     const res = details && details.menuDetailList?.sort((a, b) => a.mainSortOrder - b.mainSortOrder)?.map(ele => {
-        let modSubMenuArr = ele?.subMenuDetailList?.map(subEle => {
+        let modSubMenuArr = ele?.subMenuDetailList?.sort((a, b) => a.subFunctionSortOrder - b.subFunctionSortOrder)?.map(subEle => {
             return {
                 'id': subEle.subFunctionMasterId,
                 'route': getSubMenuRoute(ele.functionShortName, subEle.subFunctionShortName ),
