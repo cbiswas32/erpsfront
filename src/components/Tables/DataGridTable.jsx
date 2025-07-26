@@ -9,19 +9,16 @@ import {
   GridToolbarDensitySelector,
   GridToolbarQuickFilter,
 } from '@mui/x-data-grid';
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  useMediaQuery,
-  useTheme,
-  Pagination,
-  Select,
-  MenuItem,
-} from '@mui/material';
-
+import { useTheme } from '@mui/material';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import Typography from '@mui/material/Typography';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import Pagination from '@mui/material/Pagination';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 const CustomToolbar = () => (
   <GridToolbarContainer>
     <GridToolbarColumnsButton />
@@ -233,7 +230,7 @@ export default function DataGridTable({
                 '& .MuiSvgIcon-root': { fontSize: '1rem' },
               }}
             >
-              {[5, 10, 15, 20].map((num) => (
+              {[5, 10, 15, 20, 50, 100].map((num) => (
                 <MenuItem key={num} value={num}>
                   {num}
                 </MenuItem>
@@ -253,7 +250,7 @@ export default function DataGridTable({
       disableColumnMenu
       slots={{ toolbar: showToolber ? QuickSearchToolbar : null }}
       initialState={{ pagination: { paginationModel } }}
-      pageSizeOptions={[5, 10, 15, 20]}
+      pageSizeOptions={[5, 10, 15, 20, 50, 100]}
       columnVisibilityModel={columnVisibilityModel}
       sx={{
         borderRadius: 2,

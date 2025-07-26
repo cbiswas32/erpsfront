@@ -153,6 +153,12 @@ export  const subMenuRouteConfig = [
       "id": 44,
       "route": "/inventoryManagemnt/pi"
     },
+      {
+      "menuName": "Inventory Management",
+      "submenuName": "Inventory",
+      "id": 45,
+      "route": "/inventoryManagemnt/invetory"
+    },
   
     {
       "menuName": "Special Audits",
