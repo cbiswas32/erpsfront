@@ -14,6 +14,7 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import { getAcceessMatrix } from '../utils/loginUtil';
 import ManageBOMDialog from '../features/bom/ManageBOMDialog';
+import { getInventoryAdjustmentsByFilterService } from '../services/inventoryServices';
 
 function ProductPage() {
   const { showSnackbar, showLoader, hideLoader } = useUI();
@@ -35,6 +36,7 @@ function ProductPage() {
     getProductListAPICall(true);
     getProductCategoryListAPICall(true);
     getProductFeatureListAPICall(true)
+    getInventoryAdjustmentsByFilterService({startDate: '2025-07-01', endDate:'2025-07-31', productId: 120})
     let access = getAcceessMatrix('Product', 'Products');
     setAccessMatrix(access);
    

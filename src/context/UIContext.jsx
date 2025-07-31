@@ -49,7 +49,15 @@ export const UIProvider = ({ children }) => {
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
-          {snackbar.message}
+         {Array.isArray(snackbar.message) ? (
+            <ul style={{ margin: 0, paddingLeft: 16 }}>
+              {snackbar.message.map((msg, idx) => (
+                <li key={idx}>{msg}</li>
+              ))}
+            </ul>
+          ) : (
+            snackbar.message
+          )}
         </Alert>
       </Snackbar>
     </UIContext.Provider>

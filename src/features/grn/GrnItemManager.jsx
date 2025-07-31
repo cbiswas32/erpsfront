@@ -15,15 +15,16 @@ import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import Autocomplete  from "@mui/material/Autocomplete";
+import Autocomplete from "@mui/material/Autocomplete";
 import Collapse from '@mui/material/Collapse';
 
-import {useUI} from '../../context/UIContext'
+import { useUI } from '../../context/UIContext'
 import { useEffect } from "react";
 
 const defaultItem = {
   productId: "",
   pName: "",
+  isSerialNumberApplicable: false,
   poId: "",
   poItemId: "",
   quantity: "",
@@ -62,17 +63,17 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
         updated.unitPrice = selected.unitPrice;
         updated.uom = selected.unit;
         updated.productDescription = selected.description;
-        if(taxType === "INTER"){
-      updated.cgstPercent = 0;
-        updated.sgstPercent = 0;
-        updated.igstPercent = parseFloat(selected.gstPercentagePurchase) ; // You may dynamically calculate based on state
+        if (taxType === "INTER") {
+          updated.cgstPercent = 0;
+          updated.sgstPercent = 0;
+          updated.igstPercent = parseFloat(selected.gstPercentagePurchase); // You may dynamically calculate based on state
         }
-        else if(taxType === "INTRA"){
-        updated.cgstPercent = parseFloat(selected.gstPercentagePurchase) / 2;
-        updated.sgstPercent = parseFloat(selected.gstPercentagePurchase) / 2;
-        updated.igstPercent = 0; // You may dynamically calculate based on state
+        else if (taxType === "INTRA") {
+          updated.cgstPercent = parseFloat(selected.gstPercentagePurchase) / 2;
+          updated.sgstPercent = parseFloat(selected.gstPercentagePurchase) / 2;
+          updated.igstPercent = 0; // You may dynamically calculate based on state
         }
-        
+
       }
     }
 
@@ -125,26 +126,38 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
   };
 
   const handleUpdate = () => {
-    if(!taxType){
+    if (!taxType) {
       showSnackbar('Please specify the tax type to add any item!', 'error')
       return
     }
-    if(!formItem.productId){
+    if (!formItem.productId) {
       showSnackbar('Please select a product first to add!', 'error')
       return
     }
-     if(!formItem.quantity ){
+    if (!formItem.quantity) {
       showSnackbar('Please specify  product quantity to add!', 'error')
       return
     }
-   if (!formItem.receivedQuantity || formItem.receivedQuantity < 0) {
-  showSnackbar('Received Quantity must be a valid positive number.', 'error');
-  return;
-}
-  
-    if(!formItem.unitPrice){
+    if (!formItem.receivedQuantity || formItem.receivedQuantity < 0) {
+      showSnackbar('Received Quantity must be a valid positive number.', 'error');
+      return;
+    }
+
+    if (!formItem.unitPrice) {
       showSnackbar('Please specify  product unit price to add!', 'error')
       return
+    }
+
+    if (formItem.isSerialNumberApplicable &&
+      Number(formItem.receivedQuantity) !== (formItem.serialNumbers
+        ? formItem.serialNumbers.split(',').filter(sn => sn.trim() !== '').length
+        : 0)) {
+      let err = `You entered ${(formItem.serialNumbers
+        ? formItem.serialNumbers.split(',').filter(sn => sn.trim() !== '').length
+        : 0)} serial number(s), but received quantity is ${formItem.receivedQuantity}. Please add exact serial numbers!`
+      showSnackbar(err, 'error')
+      return
+
     }
     const updated = [...poItems];
     updated[editIndex] = { ...formItem };
@@ -171,156 +184,181 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
   return (
     <Box>
       <Typography variant="h6" gutterBottom>Received Goods</Typography>
-        
-          {taxType && <Box mt={3}>
+
+      {taxType && <Box mt={3}>
+        <TextField
+          fullWidth
+          size="small"
+          select
+          label="Tax Type"
+          value={taxType || ''}
+
+          onChange={(e) => {
+            setTaxType(e.target.value)
+          }}
+        >
+          <MenuItem value="INTRA">CGST + SGST</MenuItem>
+          <MenuItem value="INTER">IGST</MenuItem>
+        </TextField>
+        <Typography mt={1} mb={3} ml={1} color={'error'} variant="caption">**Please note that, Tax type mentioned in PO is {taxTypeOrg ? (taxTypeOrg === "INTRA" ? "CGST + SGST" : "IGST") : "-"}</Typography>
+      </Box>}
+
+
+      <Collapse in={isEdit} timeout={400}>
+        <Paper
+          elevation={3}
+          sx={{
+            p: 3,
+            borderRadius: 2,
+            backgroundColor: "#f9f9f9",
+            mb: 3,
+            mt: 1
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb: 2 }}>
+            Update GRN Items
+          </Typography>
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={4}>
               <TextField
-                  fullWidth
-                  size="small"
-                  select
-                  label="Tax Type"
-                  value={taxType || ''}
+                fullWidth
+                label="Product Name"
+                size="small"
 
-                  onChange={(e) => {
-                      setTaxType(e.target.value)
-                  }}
+                value={formItem.pName}
+                onChange={(e) => handleChange("pName", e.target.value)}
+                disabled
+              />
+            </Grid>
+
+            <Grid item xs={6} sm={3} md={2}>
+              <TextField
+                fullWidth
+                label="Quantity mention in PO"
+                size="small"
+                type="number"
+                value={formItem.quantity}
+                onChange={(e) => handleChange("quantity", e.target.value)}
+                disabled
+              />
+            </Grid>
+            <Grid item xs={6} sm={3} md={2}>
+              <TextField
+                fullWidth
+                label="Received Quantity"
+                size="small"
+                type="number"
+                value={formItem.receivedQuantity}
+                onChange={(e) => handleChange("receivedQuantity", e.target.value)}
+
+              />
+            </Grid>
+
+            <Grid item xs={6} sm={3} md={2}>
+              <TextField
+                fullWidth
+                label="UOM"
+                size="small"
+                value={formItem.uom}
+                disabled
+              />
+            </Grid>
+
+            <Grid item xs={6} sm={3} md={2}>
+              <TextField
+                fullWidth
+                label="Unit Price"
+                size="small"
+                type="number"
+                value={formItem.unitPrice}
+                onChange={(e) => handleChange("unitPrice", e.target.value)}
+              />
+            </Grid>
+
+
+
+            <Grid item xs={4} sm={2}>
+              <TextField
+                fullWidth
+                label="CGST %"
+                size="small"
+                type="number"
+                value={formItem.cgstPercent}
+                onChange={(e) => handleChange("cgstPercent", e.target.value)}
+              />
+            </Grid>
+
+            <Grid item xs={4} sm={2}>
+              <TextField
+                fullWidth
+                label="SGST %"
+                size="small"
+                type="number"
+                value={formItem.sgstPercent}
+                onChange={(e) => handleChange("sgstPercent", e.target.value)}
+              />
+            </Grid>
+
+            <Grid item xs={4} sm={2}>
+              <TextField
+                fullWidth
+                label="IGST %"
+                size="small"
+                type="number"
+                value={formItem.igstPercent}
+                onChange={(e) => handleChange("igstPercent", e.target.value)}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={3} md={2}>
+              <TextField
+                fullWidth
+                label="Total"
+                size="small"
+                value={Number(formItem.totalAmount || 0).toFixed(2)}
+                disabled
+              />
+            </Grid>
+            {formItem.isSerialNumberApplicable && <Grid item xs={12} sm={12} md={12}>
+              <TextField
+                multiline
+                minRows={2}
+                fullWidth
+                label="Serial Numbers (Comma separated values)"
+                size="small"
+                value={formItem.serialNumbers}
+                onChange={(e) => handleChange("serialNumbers", e.target.value)}
+                error={formItem.isSerialNumberApplicable &&
+                  Number(formItem.receivedQuantity) !== (formItem.serialNumbers
+                    ? formItem.serialNumbers.split(',').filter(sn => sn.trim() !== '').length
+                    : 0)}
+                helperText={
+                  (formItem.isSerialNumberApplicable &&
+                    Number(formItem.receivedQuantity) !== (formItem.serialNumbers
+                      ? formItem.serialNumbers.split(',').filter(sn => sn.trim() !== '').length
+                      : 0))
+                    ? `You entered ${(formItem.serialNumbers
+                      ? formItem.serialNumbers.split(',').filter(sn => sn.trim() !== '').length
+                      : 0)} serial number(s), but received quantity is ${formItem.receivedQuantity}`
+                    : ''
+                }
+              />
+            </Grid>}
+
+            <Grid item xs={12} sm={4} md={3} alignSelf="center">
+              <Button
+                fullWidth
+                variant={isEdit ? "contained" : "outlined"}
+                onClick={isEdit ? handleUpdate : handleAdd}
+                sx={{ height: "100%" }}
               >
-                  <MenuItem value="INTRA">CGST + SGST</MenuItem>
-                  <MenuItem value="INTER">IGST</MenuItem>
-              </TextField>
-              <Typography mt={1} mb={3} ml={1} color={'error'} variant="caption">**Please note that, Tax type mentioned in PO is {taxTypeOrg ? (taxTypeOrg === "INTRA" ? "CGST + SGST" : "IGST") : "-"}</Typography>
-          </Box>}
-
-    
-<Collapse in={isEdit} timeout={400}>
-<Paper
-  elevation={3}
-  sx={{
-    p: 3,
-    borderRadius: 2,
-    backgroundColor: "#f9f9f9",
-    mb: 3,
-    mt:1
-  }}
->
-  <Typography variant="h6" gutterBottom sx={{ fontWeight: "bold", mb:2 }}>
-    Update GRN Items
-  </Typography>
-
-  <Grid container spacing={2}>
-    <Grid item xs={12} sm={6} md={4}>
-     <TextField
-        fullWidth
-        label="Product Name"
-        size="small"
-       
-        value={formItem.pName}
-        onChange={(e) => handleChange("pName", e.target.value)}
-        disabled
-      />
-    </Grid>
-
-    <Grid item xs={6} sm={3} md={2}>
-      <TextField
-        fullWidth
-        label="Quantity mention in PO"
-        size="small"
-        type="number"
-        value={formItem.quantity}
-        onChange={(e) => handleChange("quantity", e.target.value)}
-        disabled
-      />
-    </Grid>
-    <Grid item xs={6} sm={3} md={2}>
-      <TextField
-        fullWidth
-        label="Received Quantity"
-        size="small"
-        type="number"
-        value={formItem.receivedQuantity}
-        onChange={(e) => handleChange("receivedQuantity", e.target.value)}
-    
-      />
-    </Grid>
-
-    <Grid item xs={6} sm={3} md={2}>
-      <TextField
-        fullWidth
-        label="UOM"
-        size="small"
-        value={formItem.uom}
-        disabled
-      />
-    </Grid>
-
-    <Grid item xs={6} sm={3} md={2}>
-      <TextField
-        fullWidth
-        label="Unit Price"
-        size="small"
-        type="number"
-        value={formItem.unitPrice}
-        onChange={(e) => handleChange("unitPrice", e.target.value)}
-      />
-    </Grid>
-
-    
-
-    <Grid item xs={4} sm={2}>
-      <TextField
-        fullWidth
-        label="CGST %"
-        size="small"
-        type="number"
-        value={formItem.cgstPercent}
-        onChange={(e) => handleChange("cgstPercent", e.target.value)}
-      />
-    </Grid>
-
-    <Grid item xs={4} sm={2}>
-      <TextField
-        fullWidth
-        label="SGST %"
-        size="small"
-        type="number"
-        value={formItem.sgstPercent}
-        onChange={(e) => handleChange("sgstPercent", e.target.value)}
-      />
-    </Grid>
-
-    <Grid item xs={4} sm={2}>
-      <TextField
-        fullWidth
-        label="IGST %"
-        size="small"
-        type="number"
-        value={formItem.igstPercent}
-        onChange={(e) => handleChange("igstPercent", e.target.value)}
-      />
-    </Grid>
-
-    <Grid item xs={12} sm={3} md={2}>
-      <TextField
-        fullWidth
-        label="Total"
-        size="small"
-        value={Number(formItem.totalAmount || 0).toFixed(2)}
-        disabled
-      />
-    </Grid>
-
-    <Grid item xs={12} sm={4} md={3} alignSelf="center">
-      <Button
-        fullWidth
-        variant={isEdit ? "contained" : "outlined"}
-        onClick={isEdit ? handleUpdate : handleAdd}
-        sx={{ height: "100%" }}
-      >
-        { "Update Item" }
-      </Button>
-    </Grid>
-  </Grid>
-</Paper>
-</Collapse>
+                {"Update Item"}
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+      </Collapse>
 
 
       {/* Table View */}
@@ -341,18 +379,27 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
           </TableRow>
         </TableHead>
         <TableBody>
-          {poItems?.length>0 ? poItems.map((item, index) => {
-           
+          {poItems?.length > 0 ? poItems.map((item, index) => {
+
             return (
-              <TableRow key={index} sx={{backgroundColor: parseFloat(item.quantity || 0) > parseFloat(item.receivedQuantity || 0) ? 'error.light' : parseFloat(item.quantity || 0) < parseFloat(item.receivedQuantity || 0) && 'success.light'  }}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>{item.pName}</TableCell>
+              <TableRow key={index} sx={{ backgroundColor: parseFloat(item.quantity || 0) > parseFloat(item.receivedQuantity || 0) ? 'error.light' : parseFloat(item.quantity || 0) < parseFloat(item.receivedQuantity || 0) && 'success.light' }}>
+                <TableCell >{index + 1}</TableCell>
+                <TableCell>
+                  <Box display="flex" flexDirection="column">
+                    <Typography sx={{ fontWeight: item.isSerialNumberApplicable && 'bold' }} >{item.pName}</Typography>
+                    {item.isSerialNumberApplicable &&
+                      <Typography variant="small" >
+                        {(item.serialNumbers && `Serials: ${item.serialNumbers}`) || '*Please add serial nos.'}
+                      </Typography>
+                    }
+                  </Box>
+                </TableCell>
                 <TableCell>{item.quantity}</TableCell>
                 <TableCell>{item.receivedQuantity}</TableCell>
                 <TableCell>{item.uom}</TableCell>
                 <TableCell>{item.unitPrice}</TableCell>
                 <TableCell>
-                  <Box display="flex" flexDirection="column">
+                  <Box  >
                     <Typography>{Number(item.cgstAmount || 0).toFixed(2)}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {Number(item.cgstPercent || 0).toFixed(2)}%
@@ -360,7 +407,7 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
                   </Box>
                 </TableCell>
                 <TableCell>
-                   <Box display="flex" flexDirection="column">
+                  <Box display="flex" flexDirection="column">
                     <Typography>{Number(item.sgstAmount || 0).toFixed(2)}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {Number(item.sgstPercent || 0).toFixed(2)}%
@@ -368,7 +415,7 @@ export default function GrnItemManager({ productList = [], taxTypeOrg, onItemsCh
                   </Box>
                 </TableCell>
                 <TableCell>
-                   <Box display="flex" flexDirection="column">
+                  <Box display="flex" flexDirection="column">
                     <Typography>{Number(item.igstAmount || 0).toFixed(2)}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {Number(item.igstPercent || 0).toFixed(2)}%

@@ -23,6 +23,9 @@ import VendorManagementPage from './pages/VendorManagementPage';
 import PoManagement from './pages/POManagement';
 import InvoiceManagement from './pages/InvoiceManagement';
 import GrnManagement from './pages/GrnManagement';
+import InventoryPage from './pages/InventoryPage';
+import InventoryAdjustmentPage from './pages/InventoryAdjustmentPage';
+import InventoryIssuePage from './pages/InventoryIssuePage';
 
 // MUI date adapter
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -79,6 +82,9 @@ function App() {
                 <Route path="inventoryManagemnt/po" element={<PoManagement />} />
                 <Route path="inventoryManagemnt/pi" element={<InvoiceManagement />} />
                 <Route path="inventoryManagemnt/grn" element={<GrnManagement />} />
+                <Route path="inventoryManagemnt/inventory" element={<InventoryPage />} />
+                <Route path="inventoryManagemnt/modifyInventory" element={<InventoryAdjustmentPage />} />
+                <Route path="inventoryManagemnt/issueInventory" element={<InventoryIssuePage />} />
 
                 <Route path="sa/user" element={<User />} />
 
