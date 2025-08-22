@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ArrowOutwardIcon from '@mui/icons-material/ArrowOutward';
 import {
   Box,
   Grid,
   Card,
   CardContent,
   Typography,
-  CircularProgress,
   Divider,
   Tooltip,
+  Skeleton,
 } from "@mui/material";
 import { ArrowUpward, ArrowDownward } from "@mui/icons-material";
+import PinDropIcon from "@mui/icons-material/PinDrop";
 import { getDashboardSummaryService } from "../../services/dashboardService";
-import PinDropIcon from '@mui/icons-material/PinDrop';
 
 // Format numbers with commas
 const formatNumber = (num) => num?.toLocaleString("en-IN") ?? 0;
@@ -25,6 +24,19 @@ const getChange = (current, previous) => {
   }
   const diff = (((current - previous) / previous) * 100).toFixed(1);
   return { diff, isUp: current >= previous };
+};
+
+// Animated Card Style
+const animatedCardStyle = {
+  height: 200,
+  borderRadius: "18px",
+  overflow: 'auto',
+  transition: "transform 0.3s, box-shadow 0.3s",
+  cursor: "pointer",
+  "&:hover": {
+    transform: "translateY(-10px) scale(1.02)",
+    boxShadow: 8,
+  },
 };
 
 export default function DashboardSummaryPage() {
@@ -48,41 +60,52 @@ export default function DashboardSummaryPage() {
     fetchSummary();
   }, []);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Box sx={{ textAlign: "center", mt: 4 }}>
-        <Typography color="error" variant="h6">{error}</Typography>
+        <Typography color="error" variant="h6">
+          {error}
+        </Typography>
       </Box>
     );
   }
 
-  const todayChange = getChange(summaryData.today.totalOrders, summaryData.yesterday.totalOrders);
-  const monthChange = getChange(summaryData.thisMonth.totalOrders, summaryData.prevMonth.totalOrders);
+  const todayChange =
+    summaryData &&
+    getChange(summaryData.today.totalOrders, summaryData.yesterday.totalOrders);
+  const monthChange =
+    summaryData &&
+    getChange(
+      summaryData.thisMonth.totalOrders,
+      summaryData.prevMonth.totalOrders
+    );
 
-  // Common Card Style with hover animation
-  const animatedCardStyle = {
-    height: 200,
-    boxShadow: 3,
-    borderRadius: "16px",
-    transition: "transform 0.3s, box-shadow 0.3s",
-    cursor: "pointer",
-    "&:hover": {
-      transform: "translateY(-8px)",
-      boxShadow: 6,
-    },
-  };
+  // Skeleton Loader (grid with placeholder cards)
+  if (loading) {
+    return (
+      <Box sx={{ p: 4, background: "#f9fafc", minHeight: "90vh"  }} >
+        <Typography variant="h4" gutterBottom>
+          Dashboard Summary
+        </Typography>
+        <Grid container spacing={4}>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Grid item xs={12} sm={6} md={4} key={i}>
+              <Card sx={{  ...animatedCardStyle }}>
+                <Skeleton variant="text" width="60%" height={30} />
+                <Skeleton variant="rectangular" width="80%" height={60} />
+                <Skeleton variant="text" width="40%" height={30} />
+                <Skeleton variant="text" width="70%" height={20} />
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ p: 4, background: "#f9fafc", minHeight: "90vh" }}>
+      <Typography variant="h4" component="h1" gutterBottom fontWeight="bold">
         Dashboard Summary
       </Typography>
 
@@ -92,12 +115,12 @@ export default function DashboardSummaryPage() {
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
               <Card
-                onClick={() => { navigate('/sales/orders'); }}
-                sx={{ ...animatedCardStyle, backgroundColor: "#e3f2fd" }}
+                onClick={() => navigate("/sales/orders")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#42a5f5,#1e88e5)", color: "#fff" }}
               >
                 <CardContent>
                   <Typography variant="h6">Today's Orders</Typography>
-                  <Typography variant="h3" color="primary">
+                  <Typography variant="h3" fontWeight="bold">
                     {summaryData.today.totalOrders}
                   </Typography>
                   <Typography variant="subtitle1">
@@ -105,7 +128,12 @@ export default function DashboardSummaryPage() {
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ display: "flex", alignItems: "center", color: todayChange.isUp ? "green" : "red", mt: 1 }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: todayChange.isUp ? "#c8e6c9" : "#ffcdd2",
+                      mt: 1,
+                    }}
                   >
                     {todayChange.isUp ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />}
                     {todayChange.diff}% vs Yesterday
@@ -119,12 +147,12 @@ export default function DashboardSummaryPage() {
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
               <Card
-                onClick={() => { navigate('/report/monthly-sales-report'); }}
-                sx={{ ...animatedCardStyle, backgroundColor: "#e8f5e9" }}
+                onClick={() => navigate("/report/monthly-sales-report")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#66bb6a,#388e3c)", color: "#fff" }}
               >
                 <CardContent>
                   <Typography variant="h6">This Month's Orders</Typography>
-                  <Typography variant="h3" color="success.main">
+                  <Typography variant="h3" fontWeight="bold">
                     {summaryData.thisMonth.totalOrders}
                   </Typography>
                   <Typography variant="subtitle1">
@@ -132,7 +160,12 @@ export default function DashboardSummaryPage() {
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ display: "flex", alignItems: "center", color: monthChange.isUp ? "green" : "red", mt: 1 }}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: monthChange.isUp ? "#c8e6c9" : "#ffcdd2",
+                      mt: 1,
+                    }}
                   >
                     {monthChange.isUp ? <ArrowUpward fontSize="small" /> : <ArrowDownward fontSize="small" />}
                     {monthChange.diff}% vs Last Month
@@ -146,15 +179,17 @@ export default function DashboardSummaryPage() {
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
               <Card
-                onClick={() => { navigate('/inventoryManagemnt/inventory'); }}
-                sx={{ ...animatedCardStyle, backgroundColor: "#ffb38033" }}
+                onClick={() => navigate("/inventoryManagemnt/inventory")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#ff9800,#f57c00)", color: "#fff" }}
               >
                 <CardContent>
                   <Typography variant="h6">Low Stock Products</Typography>
-                  <Typography variant="h3" color="warning.main">
+                  <Typography variant="h3" fontWeight="bold">
                     {summaryData.inventory.lowStockProducts}
                   </Typography>
-                  <Typography variant="subtitle1">Products below threshold</Typography>
+                  <Typography variant="subtitle1">
+                    Products below threshold
+                  </Typography>
                 </CardContent>
               </Card>
             </Tooltip>
@@ -164,12 +199,12 @@ export default function DashboardSummaryPage() {
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
               <Card
-                onClick={() => { navigate('/dealer-customer/dealerManagement'); }}
-                sx={{ ...animatedCardStyle, backgroundColor: "#cdffc8a1" }}
+                onClick={() => navigate("/dealer-customer/dealerManagement")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#26c6da,#00838f)", color: "#fff" }}
               >
                 <CardContent>
-                  <Typography variant="h6">Total Dealer</Typography>
-                  <Typography variant="h3" color="success.main">
+                  <Typography variant="h6">Total Dealers</Typography>
+                  <Typography variant="h3" fontWeight="bold">
                     {summaryData.dealerCount}
                   </Typography>
                   <Typography variant="subtitle1">Number of Dealers</Typography>
@@ -182,12 +217,12 @@ export default function DashboardSummaryPage() {
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
               <Card
-                onClick={() => { navigate('/inventoryManagemnt/vendor'); }}
-                sx={{ ...animatedCardStyle, backgroundColor: "#fff3e0" }}
+                onClick={() => navigate("/inventoryManagemnt/vendor")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#ab47bc,#6a1b9a)", color: "#fff" }}
               >
                 <CardContent>
-                  <Typography variant="h6">Total Vendor</Typography>
-                  <Typography variant="h3" color="warning.main">
+                  <Typography variant="h6">Total Vendors</Typography>
+                  <Typography variant="h3" fontWeight="bold">
                     {summaryData.vendorCount}
                   </Typography>
                   <Typography variant="subtitle1">Number of Vendors</Typography>
@@ -199,9 +234,15 @@ export default function DashboardSummaryPage() {
           {/* Locations */}
           <Grid item xs={12} sm={6} md={4}>
             <Tooltip title="Click for detailed view" arrow>
-              <Card onClick={() => {navigate('/bs/location')}} sx={{ ...animatedCardStyle, backgroundColor: "#f3e5f5" }}>
+              <Card
+                onClick={() => navigate("/bs/location")}
+                sx={{ ...animatedCardStyle, background: "linear-gradient(135deg,#ec407a,#c2185b)", color: "#fff" }}
+              >
                 <CardContent>
-                  <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
                     <PinDropIcon sx={{ mr: 1 }} /> Locations
                   </Typography>
                   {summaryData.locations.locationWiseCount.map((loc, index) => (
@@ -209,7 +250,10 @@ export default function DashboardSummaryPage() {
                       <Typography variant="body1" fontWeight="bold">
                         {loc.location_name}
                       </Typography>
-                      {index < summaryData.locations.locationWiseCount.length - 1 && <Divider sx={{ my: 1 }} />}
+                      {index <
+                        summaryData.locations.locationWiseCount.length - 1 && (
+                        <Divider sx={{ my: 1, backgroundColor: "rgba(255,255,255,0.3)" }} />
+                      )}
                     </Box>
                   ))}
                 </CardContent>

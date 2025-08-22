@@ -44,7 +44,10 @@ function Dashboard({logout}) {
         <Box sx={{ width: 'full', mb: 8 }}>
             <Grid container spacing={2}>
                 {/* <CumulativeStatus /> */}
-                <DashboardSummaryPage />
+                  <Grid size={{ xs: 12, sm: 12, md: 12 }}>
+                     <DashboardSummaryPage />
+                  </Grid>
+               
 
                 {/* Example Card */}
                 {/* <Grid size={{ xs: 6, sm: 6, md: 6 }}>
