@@ -65,7 +65,6 @@ const getStateAndDistrictListAPICall = (hideSnackbar = false) => {
 
   Promise.all([getStateListService()])
     .then(([stateRes]) => {
-      // --- Handle States ---
       if (stateRes) {
         let dropdownArray = [];
         stateRes.forEach(x => {

@@ -89,6 +89,37 @@ async function logInService(logInDetails) {
     });
   }
   
+  async function logOutService() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let token = getJWTToken();
+      let loggInUserDetails = getUserDetailsObj();
+
+      if (!token) {
+        throw new Error("Authentication failed: No token found");
+      }
+
+      let requestBody = {
+        token: token,
+        userId: loggInUserDetails?.userId,
+        dataAccessDTO: {
+          userId: loggInUserDetails?.userId,
+          userName: loggInUserDetails?.loginId
+        }
+      };
+
+      let response = await axiosPost("auth/logout", requestBody);
+
+      if (response && response.status) {
+        resolve(response.data);
+      } else {
+        reject(response.data);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
   
 
-  export {logInService, changePasswordService, resetPasswordService, resetPasswordByAdminService}
+  export {logInService, changePasswordService, resetPasswordService, resetPasswordByAdminService, logOutService}

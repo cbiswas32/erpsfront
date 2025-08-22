@@ -9,7 +9,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 import { stringToColor } from '../utils/colorUtils';
 import { getUserDetailsObj } from '../utils/loginUtil';
-
+import { logOutService } from '../services/authenticationServices';
 function ProfilePopup({ open, logOut, close }) {
   const navigate = useNavigate();
   const theme = useTheme();

@@ -63,7 +63,7 @@ const POA4View = forwardRef(({ poData }, ref) => {
           <Typography variant="body2"><strong>GST:</strong> {vendorDetails?.gst}</Typography>
           <Typography variant="body2"><strong>Mobile:</strong> {vendorDetails?.mobile}</Typography>
           <Typography variant="body2"><strong>Email:</strong> {vendorDetails?.email}</Typography>
-          <Typography variant="body2"><strong>Billing Address:</strong> {vendorDetails?.billingAddress}</Typography>
+          <Typography variant="body2"><strong>Address:</strong> {vendorDetails?.billingAddress}</Typography>
         </Box>
         <Box  width={'40%'}>
           <Typography variant="body2"><strong>PO Number:</strong> {poDetails?.poNumber}</Typography>
@@ -152,7 +152,7 @@ const POA4View = forwardRef(({ poData }, ref) => {
           <Typography variant="body2" sx={{ mt: 0.5 }}>
             <strong>Payment Term:</strong> {paymentTerm || "N/A"}
           </Typography>
-          <Box sx={{border: '1px solid black', p:1, mt:1}}>
+          <Box sx={{border: '1px solid black', p:1, mt:1, mr: 1}}>
               <Typography variant="caption" sx={{ mt: 0.5 }}>
            **Electronically generated Purchase Order — no signature required.
           </Typography>

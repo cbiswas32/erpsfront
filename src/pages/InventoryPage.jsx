@@ -168,6 +168,7 @@ const handleOpenSerialNumberDialog = (rowItem) => {
       onChange={(event, newValue) => setSelectedLocation(newValue)}
       renderOption={(props, option) => (
         <Box
+          key={option.locationId}
           component="li"
           {...props}
           sx={{ display: "flex", flexDirection: "column" }}
@@ -276,11 +277,7 @@ const handleOpenSerialNumberDialog = (rowItem) => {
   open={openSerialNumberDialog}
   onClose={() => setOpenSerailNumberDialog(false)}
   product={serialNumberProduct}
-  serials={[
-    { serial_number: "S001", status: "in_stock" },
-    { serial_number: "S002", status: "in_stock" },
-    { serial_number: "S003", status: "out_of_stock" },
-  ]}
+  serials={[]}
 />
 
     </Box>

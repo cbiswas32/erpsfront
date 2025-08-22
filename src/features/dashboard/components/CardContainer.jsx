@@ -8,7 +8,10 @@ import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 
 function CardContainer(props) {
-    const showButton = props.showbutton;
+    const showbutton = props.showbutton;
+    const buttonicon = props.buttonicon;
+    const buttonOnClick = props.buttonclick;
+    const buttontitle = props.buttontitle;
     return (
     <Card sx={{height: props.height || "auto"}} {...props}>
       {props.title && <Box sx={
@@ -23,12 +26,12 @@ function CardContainer(props) {
       <Typography  variant='body2' fontWeight={500} color='secondary.main'>
           {props.title ? props.title :  ""}
       </Typography>
-      {showButton && showButton === "true" && <Button sx={{
+      {showbutton && showbutton === true && <Button sx={{
         padding: 0, // Remove internal padding
         margin: 0,  // Remove external margin
         minWidth: 'auto', // Optional: Remove minimum width
-      }} >
-        <Typography variant='body2' > View All</Typography>
+      }}  startIcon = {buttonicon} onClick={buttonOnClick}>
+        <Typography variant='body2' >{buttontitle ||  "View All"}</Typography>
       </Button>}  
       </Box> } 
       {props.title && <Divider></Divider>}

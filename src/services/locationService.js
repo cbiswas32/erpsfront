@@ -66,7 +66,43 @@ async function saveOrUpdateLocationService(locationDTO) {
   });
 }
 
+async function getAllCompanyDetailsService() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Get authentication token and user details
+      const token = getJWTToken();
+      const user = getUserDetailsObj();
+
+      // Construct the request body with standard user and auth info
+      const requestBody = {
+        dataAccessDTO: {
+          userId: user?.userId,
+          userName: user?.loginId
+        },
+        token
+      };
+
+      // Make the API call to the company list endpoint
+      const response = await axiosPost("/location/getCompanyDetailsList", requestBody);
+
+      // Check for a successful response from both the HTTP client and the backend API
+      if (response && response.status && response.data.status) {
+        // Resolve the promise with the list of companies
+        resolve(response.data.responseObject);
+      } else {
+        // If the backend indicates failure, reject the promise with the response data
+        reject(response.data);
+      }
+    } catch (err) {
+      // Handle network errors or other exceptions during the request
+      reject(err);
+    }
+  });
+}
+
+
 export {
   getAllLocationListService,
-  saveOrUpdateLocationService
+  saveOrUpdateLocationService,
+  getAllCompanyDetailsService
 };

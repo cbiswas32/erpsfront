@@ -90,7 +90,8 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
       lowStockThreshold: item.lowStockThreshold,
       isAvailableForSale: item.isAvailableForSale,
       serialNoApplicable: item.serialNoApplicable,
-      activeFlag: item.activeFlag
+      activeFlag: item.activeFlag,
+      isFinalVeichle:  item.isFinalVeichle
     }));
   }, [productList]);
 

@@ -63,7 +63,7 @@ const GRNA4View = forwardRef(({ grnData }, ref) => {
           <Typography variant="body2"><strong>GST:</strong> {vendorDetails?.gst}</Typography>
           <Typography variant="body2"><strong>Mobile:</strong> {vendorDetails?.mobile}</Typography>
           <Typography variant="body2"><strong>Email:</strong> {vendorDetails?.email}</Typography>
-          <Typography variant="body2"><strong>Billing Address:</strong> {vendorDetails?.billingAddress}</Typography>
+          <Typography variant="body2"><strong>Address:</strong> {vendorDetails?.billingAddress}</Typography>
         </Box>
         <Box width="45%">
           <Typography variant="body2"><strong>GRN Number:</strong> {grnDetails?.grnNumber}</Typography>

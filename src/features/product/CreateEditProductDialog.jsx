@@ -47,6 +47,7 @@ function CreateEditProductDialog({
   const [gstPercentagePurchase, setGstPercentagePurchase] = useState('');
   const [description, setDescription] = useState('');
   const [isAvailableForSale, setIsAvailableForSale] = useState(false);
+  const [isFinalVeichle, setIsFinalVeichle] = useState(false);
   const [serialNoApplicable, setSerialNoApplicable] = useState(false);
   const [category, setCategory] = useState(null);
   const [lowStockThreshold, setLowStockThreshold] = useState('');
@@ -74,6 +75,7 @@ function CreateEditProductDialog({
         setGstPercentagePurchase(currentItemForEdit.gstPercentagePurchase || '');
         setDescription(currentItemForEdit.description || '');
         setIsAvailableForSale(currentItemForEdit.isAvailableForSale );
+        setIsFinalVeichle(currentItemForEdit.isFinalVeichle)
         setSerialNoApplicable(currentItemForEdit.serialNoApplicable );
         setLowStockThreshold(currentItemForEdit.lowStockThreshold || '')
         setCategory(productCategoryList.find(cat => cat.productCategoryId === currentItemForEdit.categoryId) || null);
@@ -89,6 +91,7 @@ function CreateEditProductDialog({
         setGstPercentagePurchase( '');
         setDescription('');
         setIsAvailableForSale(false);
+         setIsFinalVeichle(false)
         setSerialNoApplicable(false);
         setCategory(null);
         setProductFeatureMap([])
@@ -171,6 +174,7 @@ function CreateEditProductDialog({
       description: description.trim(),
       isAvailableForSale: isAvailableForSale ? true : false,
       serialNoApplicable: serialNoApplicable ? true : false,
+      isFinalVeichle: isFinalVeichle ? true : false,
       productCategoryId: category?.productCategoryId,
       lowStockThreshold: parseInt(lowStockThreshold) || 0,
       activeFlag: 'Y',
@@ -219,6 +223,7 @@ function CreateEditProductDialog({
     setLowStockThreshold('')
     setIsAvailableForSale(false);
     setSerialNoApplicable(false);
+    setIsFinalVeichle(false)
     setCategory(null);
     setErrors({});
     setProductFeatureMap([])
@@ -320,6 +325,7 @@ function CreateEditProductDialog({
         <FormControlLabel control={<Checkbox checked={isAvailableForSale} onChange={(e) => setIsAvailableForSale(e.target.checked)} />} label="Available for Sale" />
 
         <FormControlLabel control={<Checkbox checked={serialNoApplicable} onChange={(e) => setSerialNoApplicable(e.target.checked)} />} label="Serial Number Applicable" />
+        <FormControlLabel control={<Checkbox checked={isFinalVeichle} onChange={(e) => setIsFinalVeichle(e.target.checked)} />} label="Final Manufractured Product (E-Vehicle)" />
         <ProductFeatureSection
           productFeatureMap={productFeatureMap}
           setProductFeatureMap={setProductFeatureMap}

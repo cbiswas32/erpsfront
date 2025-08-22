@@ -9,8 +9,10 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import SpaceDashboardIcon from '@mui/icons-material/SpaceDashboard';
 import ListAltIcon from '@mui/icons-material/ListAlt';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import LocalGroceryStoreIcon from '@mui/icons-material/LocalGroceryStore';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ElectricMopedIcon from '@mui/icons-material/ElectricMoped';
+import BadgeIcon from '@mui/icons-material/Badge';
 
 export const MenuIconMap =   [
     {
@@ -33,26 +35,28 @@ export const MenuIconMap =   [
       "id": 4,
       "icon": <ReportIcon sx={{ fontSize: 20 }}/>
     },
-    {
-      "menuName": "Special Audits",
+  
+     {
+      "menuName": "Dealer and Customer Management",
       "id": 5,
-      "icon": <AuditIcon sx={{ fontSize: 20 }} />
+      "icon": <BadgeIcon sx={{ fontSize: 20 }}/>
     },
     {
-      "menuName": "General Audits",
-      "id": 6,
-      "icon": <ListAltIcon sx={{ fontSize: 20 }} />
-    },
-    {
-      "menuName": "Settings",
+      "menuName": "Activity Tracking",
       "id": 7,
-      "icon": <SettingsIcon sx={{ fontSize: 20 }} />
+      "icon": <AuditIcon sx={{ fontSize: 20 }}/>
     },
     {
-      "menuName": "Execution",
-      "id": 8,
-      "icon": <AssignmentIcon sx={{ fontSize: 20 }} />
+      "menuName": "Sales",
+      "id": 6,
+      "icon": <LocalGroceryStoreIcon sx={{ fontSize: 20 }}/>
     },
+    {
+      "menuName": "Report",
+      "id": 8,
+      "icon": <ListAltIcon sx={{ fontSize: 20 }}/>
+    },
+  
     {
       "menuName": "System Administration",
       "id": 9,
@@ -174,44 +178,38 @@ export  const subMenuRouteConfig = [
       "id": 47,
       "route": "/inventoryManagemnt/issueInventory"
     },
-  
-  
-    {
-      "menuName": "Special Audits",
-      "submenuName": "Special Audit",
+
+           {
+      "menuName": "Dealer and Customer Management",
+      "submenuName": "Dealer Management",
       "id": 51,
-      "route": "/audits/SpecialAudit"
+      "route": "/dealer-customer/dealerManagement"
     },
-    {
-      "menuName": "Special Audits",
-      "submenuName": "Special Audit Branch Map",
+    
+           {
+      "menuName": "Dealer and Customer Management",
+      "submenuName": "Customer Management",
       "id": 52,
-      "route": "/audits/SpecialAuditBranchMap"
+      "route": "/dealer-customer/customerManagement"
     },
-    {
-      "menuName": "Special Audits",
-      "submenuName": "Special Audit Plan",
-      "id": 53,
-      "route": "/audits/SpecialAuditPlan"
-    },
-    {
-      "menuName": "General Audits",
-      "submenuName": "General Audit Plan",
-      "id": 54,
-      "route": "/audits/GeneralAuditPlan"
-    },
-    {
-      "menuName": "Settings",
-      "submenuName": "Change Password",
+
+           {
+      "menuName": "Sales",
+      "submenuName": "Order Management",
       "id": 61,
-      "route": "/changepassword"
+      "route": "/sales/orders"
     },
-    {
-      "menuName": "Execution",
-      "submenuName": "Execution Dashboard",
-      "id": 71,
-      "route": "ex/execution-dashboard"
+
+     {
+      "menuName": "Activity Tracking",
+      "submenuName": "Salesman Activity",
+      "id": 91,
+      "route": "activity/salesman"
     },
+    
+  
+  
+   
     {
       "menuName": "System Administration",
       "submenuName": "User Management",
@@ -229,6 +227,27 @@ export  const subMenuRouteConfig = [
       "submenuName": "Access Management",
       "id": 83,
       "route": "sa/userrolemap"
-    }
+    },
+
+
+    
+     {
+      "menuName": "Report",
+      "submenuName": "Salesman Activity Report",
+      "id": 101,
+      "route": "report/salesman-activity"
+    },
+    {
+      "menuName": "Report",
+      "submenuName": "Monthly Sales Report",
+      "id": 102,
+      "route": "report/monthly-sales-report"
+    },
+    {
+      "menuName": "Report",
+      "submenuName": "Yearly Sales Report",
+      "id": 103,
+      "route": "report/yearly-sales-report"
+    },
   ]
   

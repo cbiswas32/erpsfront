@@ -2,7 +2,7 @@ import { axiosPost, axiosGet } from "./axios-config/requestClient";
 import { getJWTToken, getUserDetailsObj, getRole } from "../utils/loginUtil";
 
 
-async function getAuditQuestionsService() {
+async function getAuditQuestionsService(programId) {
     return new Promise(async (resolve, reject) => {
       try {
         let requestBody = {}
@@ -23,6 +23,7 @@ async function getAuditQuestionsService() {
             "userName": loggInUserDetails?.loginId
           }
         requestBody.token = token
+       
         
         let response = await axiosPost(
           url , requestBody

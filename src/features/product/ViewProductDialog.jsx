@@ -134,6 +134,7 @@ function ViewProductDialog({ open, handleClose, currentItem = {} }) {
           {renderKeyValue('Minimum Stock', currentItem.lowStockThreshold)}
           {renderKeyValue('Available for Sale', currentItem.isAvailableForSale ? 'Yes' : 'No')}
           {renderKeyValue('Serial No. Applicable', currentItem.serialNoApplicable ? 'Yes' : 'No')}
+          {renderKeyValue('Final Manufractured Product (E-Vehicle)', currentItem.isFinalVeichle ? 'Yes' : 'No')}
           {renderKeyValue('Status', currentItem.activeFlag === 'Y' ? 'Active' : 'Inactive')}
 
           <Grid item xs={12}>

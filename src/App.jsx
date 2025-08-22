@@ -8,6 +8,7 @@ import AuthenticatedPageContainer from './layouts/AuthenticatedPageContainer';
 import User from './pages/User';
 import State from './pages/State';
 import District from './pages/District';
+import { logOutService } from './services/authenticationServices';
 
 import UserRoleFunctionMap from './pages/UserRoleFunctionMap';
 
@@ -26,6 +27,18 @@ import GrnManagement from './pages/GrnManagement';
 import InventoryPage from './pages/InventoryPage';
 import InventoryAdjustmentPage from './pages/InventoryAdjustmentPage';
 import InventoryIssuePage from './pages/InventoryIssuePage';
+import DealerManagementPage from './pages/DealerManagementPage';
+import CustomerManagementPage from './pages/CustomerManagementPage';
+import SalesOrderManangement from './pages/SalesOrderManangement';
+import DealerVisitLogsPage from './pages/DealerVisitLogsPage';
+
+
+
+import SalesmanActivityReportPage from './pages/reports/SalesmanActivityReportPage';
+import MonthlySalesReportPage from './pages/reports/MonthlySalesReportPage';
+import YearlySalesReportPage from './pages/reports/YearlySalesReportPage';
+
+
 
 // MUI date adapter
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -38,7 +51,6 @@ function App() {
   const isLoggedIn = checkUserLoggedIn();
   const [isAuthenticated, setIsAuthenticated] = useState(isLoggedIn); // Toggle this for testing
 
-
   const login = (userData) => {
     if(userData){
       setStoredUserDetails(userData)
@@ -46,8 +58,20 @@ function App() {
     setIsAuthenticated(true)
   };
   const logout = () => {
-    removedStoredUserDetails()
-    setIsAuthenticated(false);
+    
+    logOutService()
+    .then(() => {
+      removedStoredUserDetails();
+      setIsAuthenticated(false);
+      
+    })
+    .catch((error) => {
+      console.error("Logout error:", error);
+      // Failsafe: still clear user data if API fails
+      removedStoredUserDetails();
+      setIsAuthenticated(false);
+   
+    });
   }
   return (
      <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -63,7 +87,7 @@ function App() {
                 element={<AuthenticatedPageContainer isAuthenticated={isAuthenticated} logout={logout} replace  />}
               >
                 <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
+                <Route path="dashboard" element={<Dashboard logout={logout} />} />
                 <Route path="changepassword" element={<ChangePasword />} />
           
                
@@ -85,10 +109,27 @@ function App() {
                 <Route path="inventoryManagemnt/inventory" element={<InventoryPage />} />
                 <Route path="inventoryManagemnt/modifyInventory" element={<InventoryAdjustmentPage />} />
                 <Route path="inventoryManagemnt/issueInventory" element={<InventoryIssuePage />} />
+                
+                
+                <Route path="dealer-customer/dealerManagement" element={<DealerManagementPage />} />
+                <Route path="dealer-customer/customerManagement" element={<CustomerManagementPage />} />
+                
+                
+                <Route path="activity/salesman" element={<DealerVisitLogsPage />} />
+                
+                
+                <Route path="sales/orders" element={<SalesOrderManangement />} />
 
                 <Route path="sa/user" element={<User />} />
 
                 <Route path="sa/userrolemap" element={<UserRoleFunctionMap />} />
+
+
+
+
+                <Route path="report/salesman-activity" element={<SalesmanActivityReportPage />} />
+                <Route path="report/monthly-sales-report" element={<MonthlySalesReportPage />} />
+                <Route path="report/yearly-sales-report" element={<YearlySalesReportPage />} />
 
 
                 <Route path="*" element={<Navigate to="/dashboard" replace />} />

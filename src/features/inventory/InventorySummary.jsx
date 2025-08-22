@@ -69,7 +69,7 @@ function InventorySummary({ filtered = [] }) {
             <Stack spacing={0.5} mt={1}>
               {Object.entries(totalQtyByUnit).map(([unit, qty]) => (
                 <Typography key={unit}>
-                  {qty} {unit}
+                  {Number(qty || 0).toFixed(2)} {unit}
                 </Typography>
               ))}
             </Stack>
