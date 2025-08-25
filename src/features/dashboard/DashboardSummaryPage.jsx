@@ -90,7 +90,7 @@ export default function DashboardSummaryPage() {
         <Grid container spacing={4}>
           {Array.from({ length: 6 }).map((_, i) => (
             <Grid item xs={12} sm={6} md={4} key={i}>
-              <Card sx={{  ...animatedCardStyle }}>
+              <Card sx={{  ...animatedCardStyle, p:4 }}>
                 <Skeleton variant="text" width="60%" height={30} />
                 <Skeleton variant="rectangular" width="80%" height={60} />
                 <Skeleton variant="text" width="40%" height={30} />

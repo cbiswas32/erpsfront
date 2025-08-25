@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import PageWrapper from '../layouts/PageWrapper';
 import { useUI } from '../context/UIContext';
 import AddIcon from '@mui/icons-material/Add';
-import { getAllProductsService, saveOrUpdateProductService } from '../services/productService';
+import { getAllProductsService, saveOrUpdateProductService, updateProductStatusService } from '../services/productService';
 import { getProductCategoryListService } from '../services/productCategoryServices';
 import ProductTable from '../features/product/ProductTable';
 import CreateEditProductDialog from '../features/product/CreateEditProductDialog';
@@ -104,6 +104,24 @@ function ProductPage() {
         !hideSnackbar && showSnackbar('Failed to fetch Products!', 'error');
       });
   };
+  const changeStatusOfProduct = (product) => {
+    showLoader();
+    updateProductStatusService(product?.productId, product?.activeFlag === 'Y' ?  false : true)
+      .then(res => {
+        console.log(res)
+        if (res && res.status ) {
+          //setProductList(res);
+         showSnackbar(res?.message || `Product ${product?.activeFlag === 'Y' ?  'deactivated' : 'activated'} successfully!`, 'success');
+        } 
+        hideLoader();
+        getProductListAPICall(true);
+      })
+      .catch(error => {
+        console.error('Failed to update product status!', error);
+        hideLoader();
+         showSnackbar('Failed to update product status!', 'error');
+      });
+  };
 
   const onClickEdit = (productObj) => {
     setCurrentItemForEdit(productObj);
@@ -118,6 +136,10 @@ function ProductPage() {
   const onClickBOM = (productObj) => {
     setCurrentItemForView(productObj);
     setOpenBOMDialog(true);
+  };
+  const onToggleStatus  = (productObj) => {
+    changeStatusOfProduct(productObj);
+    
   };
 
   const handleOpenCreateDialog = () => {
@@ -176,6 +198,7 @@ function ProductPage() {
         onClickEdit={onClickEdit}
         onClickView={onClickView}
         onClickBOM={onClickBOM}
+        onToggleStatus = {onToggleStatus }
       />
       <CreateEditProductDialog
         open={openDialog}

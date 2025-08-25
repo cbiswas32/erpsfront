@@ -89,3 +89,35 @@ export async function getProductFeaturesByProductIdService(productId) {
     }
   });
 }
+
+
+// 4. Update Product Status (Activate / Deactivate)
+export async function updateProductStatusService(productId, isActive) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const token = getJWTToken();
+      const user = getUserDetailsObj();
+
+      const requestBody = {
+        token,
+        dataAccessDTO: {
+          userId: user?.userId,
+          userName: user?.loginId
+        },
+        productId,
+        isActive, // true = active, false = inactive
+        userId: user?.userId
+      };
+
+      const response = await axiosPost('/product/updateProductStatus', requestBody);
+
+      if (response?.status && response?.data?.status) {
+        resolve(response.data);
+      } else {
+        reject(response?.data);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });
+}

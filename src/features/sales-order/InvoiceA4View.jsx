@@ -45,6 +45,7 @@ const InvoiceA4View = forwardRef(({salesOrder={}, items=[],  companyList, dealer
             phone: details.phone,
             gstin: details.gstin,
             pan: details.pan,
+            aadhar: details.aadhar,
             email: details.email
 
         })
@@ -90,6 +91,10 @@ const InvoiceA4View = forwardRef(({salesOrder={}, items=[],  companyList, dealer
           <Typography variant="subtitle2">
             <strong>Buyer Name:</strong> {buyerDetails?.buyerName || 'N/A'}
           </Typography>
+            {buyerDetails?.aadhar && <Typography variant="body2">
+            <strong>Aadhar No.:</strong> {buyerDetails?.aadhar || 'N/A'}
+          </Typography>}
+
            {buyerDetails?.gstin && <Typography variant="body2">
             <strong>GST:</strong> {buyerDetails?.gstin || 'N/A'}
           </Typography>}

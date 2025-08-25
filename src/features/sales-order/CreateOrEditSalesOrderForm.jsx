@@ -26,6 +26,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SalesOrderItemManager from './SalesOrderItemManager';
 import OrderSummary from './OrderSummery';
+import LockPersonIcon from '@mui/icons-material/LockPerson';
 
 import { saveOrUpdateSalesOrderService, listAllAvailableSalebleItems } from '../../services/salesService';
 
@@ -608,6 +609,10 @@ const CreateOrEditSalesOrderForm = ({ open, handleClose, mode, editData, onSucce
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <CreditCardIcon sx={{ fontSize: 18, color: 'secondary.main', mr: 1 }} />
                     <Typography variant="body2"><strong>PAN:</strong> {selectedCustomer?.pan}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <LockPersonIcon sx={{ fontSize: 18, color: 'secondary.main', mr: 1 }} />
+                    <Typography variant="body2"><strong>Aadhar No.:</strong> {selectedCustomer?.aadhar}</Typography>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center' }}>

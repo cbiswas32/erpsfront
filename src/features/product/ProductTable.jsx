@@ -1,18 +1,41 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import DataGridTable from '../../components/Tables/DataGridTable';
 import DescriptionIcon from '@mui/icons-material/Description';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from '@mui/material';
+import DataGridTable from '../../components/Tables/DataGridTable';
 
 const paginationModel = { page: 0, pageSize: 10 };
 
-function ProductTable({ productList, getProductListAPICall, onClickEdit, onClickView, onClickBOM }) {
+function ProductTable({ productList, getProductListAPICall, onClickEdit, onClickView, onClickBOM, onToggleStatus }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
     getProductListAPICall();
   }, []);
+
+  const handleStatusClick = (row) => {
+    setSelectedProduct(row);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirm = () => {
+    if (selectedProduct) {
+      onToggleStatus(selectedProduct); // call parent API handler
+    }
+    setConfirmOpen(false);
+    setSelectedProduct(null);
+  };
+
+  const handleCancel = () => {
+    setConfirmOpen(false);
+    setSelectedProduct(null);
+  };
 
   const columns = [
     { field: 'slNo', headerName: 'SL No.', headerClassName: 'table-header', flex: 1, minWidth: 80 },
@@ -21,24 +44,19 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
     { field: 'category', headerName: 'Category', headerClassName: 'table-header', flex: 2, minWidth: 160 },
     { field: 'brand', headerName: 'Brand', headerClassName: 'table-header', flex: 1, minWidth: 100 },
     { field: 'unit', headerName: 'Unit', headerClassName: 'table-header', flex: 1, minWidth: 100 },
-    // { field: 'unitPrice', headerName: 'Unit Price', headerClassName: 'table-header', flex: 1, minWidth: 100 },
-    // { field: 'hsnCode', headerName: 'HSN Code', headerClassName: 'table-header', flex: 1, minWidth: 100 },
-    // { field: 'gstPercentage', headerName: 'GST %', headerClassName: 'table-header', flex: 1, minWidth: 100 },
-    // { field: 'description', headerName: 'Description', headerClassName: 'table-header', flex: 2, minWidth: 150 },
-    // { field: 'isAvailableForSale', headerName: 'Available for Sale', headerClassName: 'table-header', flex: 1, minWidth: 150 },
-    // { field: 'serialNoApplicable', headerName: 'Serial No. Applicable', headerClassName: 'table-header', flex: 1, minWidth: 180 },
+
     {
       field: 'activeFlag',
       headerName: 'Status',
       headerClassName: 'table-header',
       flex: 1,
-      minWidth: 100,
+      minWidth: 120,
       renderCell: (params) => (
         <Chip
           label={params.value === 'Y' ? 'Active' : 'Inactive'}
           color={params.value === 'Y' ? 'success' : 'error'}
           size="small"
-          variant="outlined"
+          sx={{ cursor: 'pointer' }}
         />
       )
     },
@@ -48,7 +66,7 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
       headerClassName: 'table-header',
       sortable: false,
       flex: 1,
-      minWidth: 100,
+      minWidth: 150,
       renderCell: (params) => (
         <div style={{ display: 'flex', gap: 8 }}>
           <EditIcon
@@ -61,11 +79,20 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
             onClick={() => onClickView(params.row)}
             sx={{ cursor: 'pointer' }}
           />
+         
           <DescriptionIcon
             color="primary"
             onClick={() => onClickBOM(params.row)}
             sx={{ cursor: 'pointer' }}
           />
+
+           {
+            params.row.activeFlag === "Y" ? <ToggleOnIcon  color="primary"
+            onClick={() => handleStatusClick(params.row)}
+            sx={{ cursor: 'pointer' }} /> : <ToggleOffIcon  color="error"
+            onClick={() => handleStatusClick(params.row)}
+            sx={{ cursor: 'pointer' }} />
+          }
         </div>
       ),
     },
@@ -91,7 +118,7 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
       isAvailableForSale: item.isAvailableForSale,
       serialNoApplicable: item.serialNoApplicable,
       activeFlag: item.activeFlag,
-      isFinalVeichle:  item.isFinalVeichle
+      isFinalVeichle: item.isFinalVeichle
     }));
   }, [productList]);
 
@@ -103,6 +130,21 @@ function ProductTable({ productList, getProductListAPICall, onClickEdit, onClick
         columnVisibilityModel={{ id: false }}
         paginationModel={paginationModel}
       />
+
+      {/* Confirmation Dialog */}
+      <Dialog open={confirmOpen} onClose={handleCancel}>
+        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to {selectedProduct?.activeFlag === 'Y' ? 'deactivate' : 'activate'}{' '}
+            <b>{selectedProduct?.productName}</b>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="inherit">Cancel</Button>
+          <Button onClick={handleConfirm} color="primary" variant="contained">Yes</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

@@ -6,6 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import Divider from "@mui/material/Divider";
 import Autocomplete from "@mui/material/Autocomplete";
 import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
@@ -30,6 +31,7 @@ import * as XLSX from "xlsx";
 function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
   const [bomList, setBOMList] = useState([]);
   const [grandTotal, setGrandTotal] = useState(0);
+  const [grandTotalWithGST, setGrandTotalWithGST] = useState(0);
   const { showSnackbar, showLoader, hideLoader } = useUI();
   console.log("bomList", bomList);
 
@@ -44,6 +46,8 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
       ["Product Name", productName],
       ["Product Code", productCode],
       ["Grand Total", grandTotal],
+      ["GST", (Number(grandTotalWithGST) - Number(grandTotal)).toFixed(2)],
+      ["Grand Total With GST", grandTotalWithGST],
       ["Total Items Needed", totalItems],
       ["Date", todayDate],
       [], // Empty row for spacing
@@ -56,7 +60,9 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
         "Quantity",
         "Unit",
         "Unit Price (Rs.)",
-        "Total Price (Rs.)",
+        "GST (%)",
+        "Total Price Without GST (Rs.)",
+        "Total Price With GST (Rs.)",
       ],
     ];
 
@@ -71,9 +77,13 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
         item.quantity,
         item.unit || "",
         item.unitPrice || 0,
+        item.purchaseGstPercentage || 0,
         (
           parseFloat(item.unitPrice || 0) * parseFloat(item.quantity || 0)
         ).toFixed(2),
+        (
+          parseFloat(item.unitPrice || 0) * parseFloat(item.quantity || 0) * (1+ 0.01*parseFloat(item.purchaseGstPercentage ||0 ))
+        ).toFixed(2)
       ];
     });
 
@@ -91,7 +101,7 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
       { wch: 20 }, // Product Code
       { wch: 10 }, // Quantity
       { wch: 10 }, // Unit
-      { wch: 15 }, // Unit Price
+      { wch: 20 }, // Unit Price
       { wch: 15 }, // Total Price
     ];
 
@@ -112,9 +122,16 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
       const qty = parseFloat(item.quantity || 0);
       return sum + price * qty;
     }, 0);
+    const totalCostWithGST = bomList?.reduce((sum, item) => {
+      const price = parseFloat(item.unitPrice || 0);
+      const qty = parseFloat(item.quantity || 0);
+      const gst = 1 + 0.01*parseFloat(item.purchaseGstPercentage || 0);
+      return sum + price * qty * gst;
+    }, 0);
 
     const roundedTotal = totalCost.toFixed(2);
     setGrandTotal(roundedTotal || 0);
+    setGrandTotalWithGST(totalCostWithGST.toFixed(2) || 0);
   }, [open, bomList]);
 
   const fetchBOM = async (productId) => {
@@ -201,7 +218,8 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
         </Box>
       </DialogTitle>
       <DialogContent dividers>
-        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: 'center' }}>
+          <Box>
           <Button
             variant="outlined"
             onClick={handleAdd}
@@ -210,9 +228,39 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
           >
             Add Component
           </Button>
-          <Typography fontWeight={500}>
-            Grand Total: Rs. {grandTotal}
-          </Typography>
+          </Box>
+          
+         
+<Box
+  sx={{
+    mb: 2,
+    p: 2,
+    border: "2px solid #1976d2",
+    borderRadius: 3,
+    background: "linear-gradient(145deg, #f9f9f9, #e3f2fd)",
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+    textAlign: "right",
+    maxWidth: 350,
+    ml: "auto",
+  }}
+>
+  <Typography variant="h6" fontWeight={600} color="text.primary">
+    Grand Total
+  </Typography>
+  <Divider sx={{ my: 1 }} />
+  <Typography variant="subtitle1" fontWeight={500} color="text.secondary">
+    Without GST: <b>₹ {grandTotal}</b>
+  </Typography>
+  <Typography
+    variant="h6"
+    fontWeight={700}
+    color="success.main"
+    sx={{ mt: 1 }}
+  >
+    With GST: ₹ {grandTotalWithGST}
+  </Typography>
+</Box>
+         
         </Box>
 
         {bomList.length > 0 ? (
@@ -222,8 +270,8 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
                 <TableRow>
                   <TableCell>Component</TableCell>
                   <TableCell>Quantity</TableCell>
-                  <TableCell>Unit Price (Rs.)</TableCell>
-                  <TableCell>Total Price (Rs.)</TableCell>
+                  <TableCell width={160}>Unit Price (Rs.)</TableCell>
+                  <TableCell width={160}>Total Price (Rs.)</TableCell>
                   <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
@@ -301,6 +349,11 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
                               "unitPrice",
                               newValue?.unitPrice || ""
                             );
+                            handleChange(
+                              row.tempId,
+                              "purchaseGstPercentage",
+                              newValue?.gstPercentagePurchase || ""
+                            );
                           }}
                           renderInput={(params) => (
                             <TextField
@@ -335,17 +388,27 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
                         />
                       </TableCell>
                       <TableCell>
-                        <TextField
+                        <Box display={'flex'} flexDirection={'column'}>
+                          <Typography  variant="caption"><b>Without GST: </b>{row.unitPrice || ""}</Typography>
+                          <Typography  variant="caption"><b>With GST: </b>{(Number(row.unitPrice || 0)*(1 + 0.01*Number((row.purchaseGstPercentage || 0))))?.toFixed(2)}</Typography>
+                          <Typography  variant="caption"><b>GST: </b>{row.purchaseGstPercentage || "Not Available"}%</Typography>
+                        </Box>
+                        {/* <TextField
                           type="number"
                           size="small"
                           fullWidth
                           disabled
                           value={row.unitPrice || ""}
                           //onChange={(e) => handleChange(row.tempId, 'quantity', e.target.value)}
-                        />
+                        /> */}
                       </TableCell>
                       <TableCell>
-                        <TextField
+                        <Box display={'flex'} flexDirection={'column'}>
+                          <Typography variant="caption"><b>Without GST: </b>{ (Number(row.unitPrice) || 0) *
+                            (Number(row.quantity) || 0)?.toFixed(2) || ""}</Typography>
+                          <Typography  variant="caption"><b>With GST: </b>{(Number(row.unitPrice || 0)*(1 + 0.01*Number((row.purchaseGstPercentage || 0)))*Number((row.quantity) || 0))?.toFixed(2)}</Typography>
+                        </Box>
+                        {/* <TextField
                           type="number"
                           size="small"
                           fullWidth
@@ -355,7 +418,7 @@ function ManageBOMDialog({ open, handleClose, product, allProducts = [] }) {
                             (parseFloat(row.quantity) || 0).toFixed(2)
                           }
                           //onChange={(e) => handleChange(row.tempId, 'quantity', e.target.value)}
-                        />
+                        /> */}
                       </TableCell>
                       <TableCell>
                         <IconButton

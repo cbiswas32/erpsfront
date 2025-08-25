@@ -27,6 +27,7 @@ const defaultCustomer = {
   phone: '',
   pan: '',
   gstin: '',
+  aadhar: '',
   addressline1: '' ,
   addressline2: '',
   city: '',
@@ -67,14 +68,14 @@ export default function CustomerManagementPage() {
 
   const handleSave = async () => {
 
-    const { customerName, customerCode, email, phone, pan, gstin } = formData;
+    const { customerName, customerCode, email, phone, pan, gstin, aadhar } = formData;
 
     // Validation
     if (!customerName || !customerCode || !phone) {
-      return showSnackbar('All fields are required except PAN/GST and email.', 'warning');
+      return showSnackbar('All fields are required except PAN/GST/Aadhar and email.', 'warning');
     }
-    if (!pan && !gstin) {
-      return showSnackbar('Either PAN or GSTIN is required.', 'warning');
+    if (!pan && !gstin && !aadhar) {
+      return showSnackbar('Either Aadhar or PAN or GSTIN is required.', 'warning');
     }
 
     showLoader()
@@ -190,6 +191,10 @@ export default function CustomerManagementPage() {
                   <BadgeIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
                   <Typography variant="body2">GSTIN: {customer.gstin || 'N/A'}</Typography>
                 </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', mt:1 }}>
+                  <PersonIcon fontSize="small" sx={{ mr: 1, color: 'text.secondary' }} />
+                  <Typography variant="body2">Aadhar No.: {customer.aadhar || 'N/A'}</Typography>
+                </Box>
               </CardContent>
 
               {/* Actions */}
@@ -264,6 +269,10 @@ export default function CustomerManagementPage() {
           <TextField
             fullWidth margin="dense" label="GST Number"
             value={formData.gstin} onChange={e => handleChange('gstin', e.target.value)}
+          />
+          <TextField
+            fullWidth margin="dense" label="Aadhar Number"
+            value={formData.aadhar} onChange={e => handleChange('aadhar', e.target.value)}
           />
         </DialogContent>
         <DialogActions>
